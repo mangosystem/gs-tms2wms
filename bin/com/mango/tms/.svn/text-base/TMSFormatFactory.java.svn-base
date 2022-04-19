@@ -1,0 +1,73 @@
+/*
+ *    GeoTools - The Open Source Java GIS Toolkit
+ *    http://geotools.org
+ *
+ *    (C) 2006-2008, Open Source Geospatial Foundation (OSGeo)
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ */
+package com.mango.tms;
+
+import java.awt.RenderingHints;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
+
+import org.geotools.coverage.grid.io.GridFormatFactorySpi;
+import org.geotools.data.DataAccessFactory.Param;
+import org.geotools.util.KVP;
+import org.opengis.coverage.grid.Format;
+
+public final class TMSFormatFactory implements GridFormatFactorySpi {
+
+    public static final Param PARAM_FILE = new Param("getURL path", URL.class, "url to a tms tile url",
+            true, null, new KVP(Param.LEVEL, "advanced"));
+
+    public static final Param PARAM_SRS = new Param("srs", String.class, "force srs", false, "",
+            new KVP(Param.LEVEL, "advanced"));
+
+    public static final Param PARAM_MAX_EXTENT = new Param("max extent", String.class,
+            "minx,miny,maxx,maxy", false, "", new KVP(
+                    Param.LEVEL, "advanced"));
+ 
+    public static final Param PARAM_BLANK_IMG_URL = new Param("url", String.class,
+            "blank image url", false, "", new KVP(
+                    Param.LEVEL, "advanced"));
+ 
+    public static final Param PARAM_URL_PATTERN = new Param("url pattern", String.class,
+            "url pattern", false, "", new KVP(
+                    Param.LEVEL, "advanced"));
+    
+	public boolean isAvailable() {
+		boolean available = true;
+
+		// it needs ImageMosaic and other things inside it
+		try {
+			Class.forName("com.mango.tms.TMSReader");
+		} catch (ClassNotFoundException cnf) {
+			available = false;
+		}
+
+		return available;
+	}
+
+	public TMSFormat createFormat() {
+		return new TMSFormat();
+	}
+
+    public Param[] getParametersInfo() {
+        return new Param[] { PARAM_FILE, PARAM_SRS, PARAM_BLANK_IMG_URL };
+    }
+    
+	public Map<RenderingHints.Key, ?> getImplementationHints() {
+		return Collections.emptyMap();
+	}
+}

@@ -1,0 +1,14 @@
+tile.width				256
+tile.height				256
+tile.origin.x 			-20037508.34
+tile.origin.y 			20037508.34
+maxresolution	 		78271.516953125
+zoomlevel				18
+tile.crs.code 			epsg:900913
+extent					-20037508.34,-20037508.34,20037508.34,20037508.34
+blank.image.url
+path.generator 			com.mango.tms.TMSPathGenerator
+url.pattern 			http://a.tiles.mapbox.com/v3/tmcw.map-7s15q36b/%LEVEL%/%COL%/%ROW%.png
+layer.name				MapBox
+namingPolicy			LU
+outline 				true

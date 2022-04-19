@@ -1,0 +1,15 @@
+layer.name vworld_sat
+tile.width 256
+tile.height 256
+tile.origin.x -20037508.34
+tile.origin.y 20037508.34	 
+maxresolution 78271.516953125
+zoomlevel 18	
+service.level.min 7
+service.level.max 18
+tile.crs.code epsg:900913
+extent -20037508.34, -20037508.34, 20037508.34, 20037508.34
+path.generator com.mango.tms.VWorldPathGenerator
+namingpolicy LU
+url.pattern http://xdworld.vworld.kr:8080/2d/Satellite/201301/%LEVEL%/%COL%/%ROW%.jpeg
+outline false
