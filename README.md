@@ -10,6 +10,7 @@
 
 
 .properties file
+
 smple file is OpenStreetMap Tms service
 
 
