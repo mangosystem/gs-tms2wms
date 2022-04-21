@@ -46,5 +46,5 @@ smple file is OpenStreetMap Tms service
 > 
 > <b>tile.cache=false</b> => Set to 'true' if the tile will be saved to the server folder.
 > 
-> <b>cache.path=/Your/server/tms/tile/osm</b>
+> <b>cache.path=/Your/server/tile/directory/osm</b>
 > 
