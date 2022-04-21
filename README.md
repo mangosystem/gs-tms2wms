@@ -14,7 +14,7 @@
 smple file is OpenStreetMap Tms service
 
 
-> layer.name=OSM => layer name
+> <b>layer.name=OSM</b> => layer name
 > 
 > tile.width=256 => Tile X size of original TMS service
 > 
