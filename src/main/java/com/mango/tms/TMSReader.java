@@ -21,13 +21,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.imageio.ImageReadParam;
 
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -36,29 +33,22 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
-import org.geotools.coverage.grid.io.OverviewPolicy;
-import org.geotools.data.DataSourceException;
 import org.geotools.gce.imagemosaic.ImageMosaicReader;
-import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
-import org.geotools.util.URLs;
 import org.geotools.util.factory.Hints;
 import org.opengis.coverage.grid.Format;
 import org.opengis.coverage.grid.GridCoverageReader;
 import org.opengis.geometry.Envelope;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
 
 public final class TMSReader extends AbstractGridCoverage2DReader implements GridCoverageReader {
 
 	private final static Logger LOGGER = org.geotools.util.logging.Logging.getLogger(TMSReader.class.toString());
 
-	private URL sourceURL;
-	private String[] levelsDirs;
+//	private URL sourceURL;
+//	private String[] levelsDirs;
 	private ConcurrentHashMap<Integer, ImageMosaicReader> readers = new ConcurrentHashMap<Integer, ImageMosaicReader>();
 
 	private TileGenerator fTG = null;
@@ -302,128 +292,128 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		// return loadTiles(requestedEnvelope, dim, params, overviewPolicy);
 	}
 
-	private GridCoverage2D loadTiles(GeneralEnvelope requestedEnvelope, Rectangle dim, GeneralParameterValue[] params,
-			OverviewPolicy overviewPolicy) throws IOException {
+//	private GridCoverage2D loadTiles(GeneralEnvelope requestedEnvelope, Rectangle dim, GeneralParameterValue[] params,
+//			OverviewPolicy overviewPolicy) throws IOException {
+//
+//		//
+//		// Check if we have something to load by intersecting the requested
+//		// envelope with the bounds of the data set.
+//		//
+//		// If the requested envelope is not in the same crs of the data set crs
+//		// we have to perform a conversion towards the latter crs before
+//		// intersecting anything.
+//		//
+//
+//		if (requestedEnvelope != null) {
+//			if (!CRS.equalsIgnoreMetadata(requestedEnvelope.getCoordinateReferenceSystem(), this.crs)) {
+//				try {
+//					// transforming the envelope back to the data set crs
+//					final MathTransform transform = CRS
+//							.findMathTransform(requestedEnvelope.getCoordinateReferenceSystem(), crs, true);
+//					if (!transform.isIdentity()) {
+//						requestedEnvelope = CRS.transform(transform, requestedEnvelope);
+//						requestedEnvelope.setCoordinateReferenceSystem(this.crs);
+//
+//						if (LOGGER.isLoggable(Level.FINE))
+//							LOGGER.fine(new StringBuilder("Reprojected envelope ").append(requestedEnvelope.toString())
+//									.append(" crs ").append(crs.toWKT()).toString());
+//					}
+//				} catch (TransformException e) {
+//					throw new DataSourceException("Unable to create a coverage for this source", e);
+//				} catch (FactoryException e) {
+//					throw new DataSourceException("Unable to create a coverage for this source", e);
+//				}
+//			}
+//			if (!requestedEnvelope.intersects(this.originalEnvelope, false))
+//				return null;
+//
+//			// intersect the requested area with the bounds of this layer
+//			requestedEnvelope.intersect(originalEnvelope);
+//
+//		} else {
+//			requestedEnvelope = new GeneralEnvelope(originalEnvelope);
+//
+//		}
+//		requestedEnvelope.setCoordinateReferenceSystem(this.crs);
+//		// ok we got something to return
+//		try {
+//			return loadRequestedTiles(requestedEnvelope, dim, params, overviewPolicy);
+//		} catch (TransformException e) {
+//			throw new DataSourceException(e);
+//		}
+//
+//	}
 
-		//
-		// Check if we have something to load by intersecting the requested
-		// envelope with the bounds of the data set.
-		//
-		// If the requested envelope is not in the same crs of the data set crs
-		// we have to perform a conversion towards the latter crs before
-		// intersecting anything.
-		//
-
-		if (requestedEnvelope != null) {
-			if (!CRS.equalsIgnoreMetadata(requestedEnvelope.getCoordinateReferenceSystem(), this.crs)) {
-				try {
-					// transforming the envelope back to the data set crs
-					final MathTransform transform = CRS
-							.findMathTransform(requestedEnvelope.getCoordinateReferenceSystem(), crs, true);
-					if (!transform.isIdentity()) {
-						requestedEnvelope = CRS.transform(transform, requestedEnvelope);
-						requestedEnvelope.setCoordinateReferenceSystem(this.crs);
-
-						if (LOGGER.isLoggable(Level.FINE))
-							LOGGER.fine(new StringBuilder("Reprojected envelope ").append(requestedEnvelope.toString())
-									.append(" crs ").append(crs.toWKT()).toString());
-					}
-				} catch (TransformException e) {
-					throw new DataSourceException("Unable to create a coverage for this source", e);
-				} catch (FactoryException e) {
-					throw new DataSourceException("Unable to create a coverage for this source", e);
-				}
-			}
-			if (!requestedEnvelope.intersects(this.originalEnvelope, false))
-				return null;
-
-			// intersect the requested area with the bounds of this layer
-			requestedEnvelope.intersect(originalEnvelope);
-
-		} else {
-			requestedEnvelope = new GeneralEnvelope(originalEnvelope);
-
-		}
-		requestedEnvelope.setCoordinateReferenceSystem(this.crs);
-		// ok we got something to return
-		try {
-			return loadRequestedTiles(requestedEnvelope, dim, params, overviewPolicy);
-		} catch (TransformException e) {
-			throw new DataSourceException(e);
-		}
-
-	}
-
-	private GridCoverage2D loadRequestedTiles(GeneralEnvelope requestedEnvelope, Rectangle dim,
-			GeneralParameterValue[] params, OverviewPolicy overviewPolicy) throws TransformException, IOException {
-
-		// if we get here we have something to load
-
-		//
-		// compute the requested resolution
-		//
-		final ImageReadParam readP = new ImageReadParam();
-		Integer imageChoice = 0;
-		if (dim != null)
-			imageChoice = setReadParams(overviewPolicy, readP, requestedEnvelope, dim);
-
-		//
-		// Check to have the needed reader in memory
-		//
-
-		// light check to see if this reader had been disposed, not synching for
-		// performance.
-		if (readers == null) {
-			throw new IllegalStateException("This ImagePyramidReader has already been disposed");
-		}
-
-		ImageMosaicReader reader = readers.get(imageChoice);
-		if (reader == null) {
-
-			//
-			// we must create the underlying mosaic
-			//
-			final String levelDirName = levelsDirs[imageChoice.intValue()];
-			final URL parentUrl = URLs.getParentUrl(sourceURL);
-			// look for a shapefile first
-			final String extension = new StringBuilder(levelDirName).append("/").append(coverageName).append(".shp")
-					.toString();
-			final URL shpFileUrl = URLs.extendUrl(parentUrl, extension);
-			if (shpFileUrl.getProtocol() != null && shpFileUrl.getProtocol().equalsIgnoreCase("file")
-					&& !URLs.urlToFile(shpFileUrl).exists())
-				reader = new ImageMosaicReader(URLs.extendUrl(parentUrl, levelDirName), hints);
-			else
-				reader = new ImageMosaicReader(shpFileUrl, hints);
-			final ImageMosaicReader putByOtherThreadJustNow = readers.putIfAbsent(imageChoice, reader);
-			if (putByOtherThreadJustNow != null) {
-				// some other thread just did inserted this
-				try {
-					reader.dispose();
-				} catch (Exception e) {
-					if (LOGGER.isLoggable(Level.FINE)) {
-						LOGGER.log(Level.FINE, e.getLocalizedMessage(), e);
-					}
-				}
-
-				// use the other one
-				reader = putByOtherThreadJustNow;
-			}
-
-		}
-
-		//
-		// Abusing of the created ImageMosaicreader for getting a
-		// gridcoverage2d, then rename it
-		//
-		GridCoverage2D mosaicCoverage = reader.read(params);
-		if (mosaicCoverage != null) {
-			return new GridCoverage2D(coverageName, mosaicCoverage);
-		} else {
-			// the mosaic can still return null in corner cases, handle that
-			// gracefully
-			return null;
-		}
-	}
+//	private GridCoverage2D loadRequestedTiles(GeneralEnvelope requestedEnvelope, Rectangle dim,
+//			GeneralParameterValue[] params, OverviewPolicy overviewPolicy) throws TransformException, IOException {
+//
+//		// if we get here we have something to load
+//
+//		//
+//		// compute the requested resolution
+//		//
+//		final ImageReadParam readP = new ImageReadParam();
+//		Integer imageChoice = 0;
+//		if (dim != null)
+//			imageChoice = setReadParams(overviewPolicy, readP, requestedEnvelope, dim);
+//
+//		//
+//		// Check to have the needed reader in memory
+//		//
+//
+//		// light check to see if this reader had been disposed, not synching for
+//		// performance.
+//		if (readers == null) {
+//			throw new IllegalStateException("This ImagePyramidReader has already been disposed");
+//		}
+//
+//		ImageMosaicReader reader = readers.get(imageChoice);
+//		if (reader == null) {
+//
+//			//
+//			// we must create the underlying mosaic
+//			//
+//			final String levelDirName = levelsDirs[imageChoice.intValue()];
+//			final URL parentUrl = URLs.getParentUrl(sourceURL);
+//			// look for a shapefile first
+//			final String extension = new StringBuilder(levelDirName).append("/").append(coverageName).append(".shp")
+//					.toString();
+//			final URL shpFileUrl = URLs.extendUrl(parentUrl, extension);
+//			if (shpFileUrl.getProtocol() != null && shpFileUrl.getProtocol().equalsIgnoreCase("file")
+//					&& !URLs.urlToFile(shpFileUrl).exists())
+//				reader = new ImageMosaicReader(URLs.extendUrl(parentUrl, levelDirName), hints);
+//			else
+//				reader = new ImageMosaicReader(shpFileUrl, hints);
+//			final ImageMosaicReader putByOtherThreadJustNow = readers.putIfAbsent(imageChoice, reader);
+//			if (putByOtherThreadJustNow != null) {
+//				// some other thread just did inserted this
+//				try {
+//					reader.dispose();
+//				} catch (Exception e) {
+//					if (LOGGER.isLoggable(Level.FINE)) {
+//						LOGGER.log(Level.FINE, e.getLocalizedMessage(), e);
+//					}
+//				}
+//
+//				// use the other one
+//				reader = putByOtherThreadJustNow;
+//			}
+//
+//		}
+//
+//		//
+//		// Abusing of the created ImageMosaicreader for getting a
+//		// gridcoverage2d, then rename it
+//		//
+//		GridCoverage2D mosaicCoverage = reader.read(params);
+//		if (mosaicCoverage != null) {
+//			return new GridCoverage2D(coverageName, mosaicCoverage);
+//		} else {
+//			// the mosaic can still return null in corner cases, handle that
+//			// gracefully
+//			return null;
+//		}
+//	}
 
 	@Override
 	public synchronized void dispose() {
@@ -461,9 +451,9 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		return 1;
 	}
 
-	double[] getHighestRes() {
-		return highestRes;
-	}
+//	double[] getHighestRes() {
+//		return highestRes;
+//	}
 
 	public int getLevel(double minX, double minY, double maxX, double maxY, int width, int height) {
 		double[] resSet = fTG.getResolutions();
