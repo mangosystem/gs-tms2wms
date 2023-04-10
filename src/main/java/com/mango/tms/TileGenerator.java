@@ -38,6 +38,7 @@ public class TileGenerator {
 	private int fUrlServerStart;
 	private String fImageFormat;
 
+	@SuppressWarnings("deprecation")
 	public TileGenerator(Properties props) throws Exception {
 		String value = props.getProperty("tile.width");
 		if (value == null) {

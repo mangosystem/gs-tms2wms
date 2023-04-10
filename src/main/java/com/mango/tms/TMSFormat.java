@@ -1,19 +1,3 @@
-/*
- *    GeoTools - The Open Source Java GIS Toolkit
- *    http://geotools.org
- *
- *    (C) 2006-2008, Open Source Geospatial Foundation (OSGeo)
- *
- *    This library is free software; you can redistribute it and/or
- *    modify it under the terms of the GNU Lesser General Public
- *    License as published by the Free Software Foundation;
- *    version 2.1 of the License.
- *
- *    This library is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *    Lesser General Public License for more details.
- */
 package com.mango.tms;
 
 import java.awt.Color;
@@ -30,7 +14,6 @@ import org.geotools.coverage.grid.io.imageio.GeoToolsWriteParams;
 import org.geotools.parameter.DefaultParameterDescriptor;
 import org.geotools.parameter.DefaultParameterDescriptorGroup;
 import org.geotools.parameter.ParameterGroup;
-import org.geotools.util.URLs;
 import org.geotools.util.factory.Hints;
 import org.opengis.coverage.grid.Format;
 import org.opengis.coverage.grid.GridCoverageWriter;
@@ -136,23 +119,23 @@ public final class TMSFormat extends AbstractGridFormat implements Format {
 	 */
 	@Override
 	public boolean accepts(Object input, Hints hints) {
-		String pathname = "";
+//		String pathname = "";
 
 		if (input instanceof URL) {
 			final URL url = (URL) input;
 			final String protocol = url.getProtocol();
-			if (protocol.equalsIgnoreCase("file"))
-				pathname = URLs.urlToFile(url).getPath();
+			if (protocol.equalsIgnoreCase("file")) {}
+//				pathname = URLs.urlToFile(url).getPath();
 			else {
 				if (protocol.equalsIgnoreCase("http")) {
 					return false;
 				}
 			}
 		} else if (input instanceof File) {
-			File file = (File) input;
-			pathname = file.getAbsolutePath();
+//			File file = (File) input;
+//			pathname = file.getAbsolutePath();
 		} else if (input instanceof String) {
-			pathname = (String) input;
+//			pathname = (String) input;
 		} else {
 			return false;
 		}

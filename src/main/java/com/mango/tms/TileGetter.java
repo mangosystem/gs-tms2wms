@@ -19,6 +19,7 @@ public class TileGetter implements Runnable {
 
 	}
 
+	@SuppressWarnings("unused")
 	private void getImage(String imagePath, String cacheFilePath) throws Exception{
 		//System.out.println(imagePath);
 		BufferedImage bi = ImageIO.read(new URL(imagePath));

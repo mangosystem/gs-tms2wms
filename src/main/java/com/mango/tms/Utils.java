@@ -33,12 +33,10 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.geotools.data.DataUtilities;
-import org.geotools.util.factory.Hints;
+import org.geotools.coverage.util.CoverageUtilities;
 //import org.geotools.gce.imagemosaic.ImageMosaicFormat;
 //import org.geotools.gce.imagemosaic.ImageMosaicReader;
 //import org.geotools.gce.tms.MosaicInfo;
@@ -46,19 +44,10 @@ import org.geotools.util.factory.Hints;
 import org.geotools.gce.imagemosaic.ImageMosaicFormat;
 import org.geotools.gce.imagemosaic.ImageMosaicReader;
 import org.geotools.geometry.GeneralEnvelope;
-import org.geotools.coverage.util.CoverageUtilities;
+import org.geotools.util.factory.Hints;
 import org.geotools.util.logging.Logging;
 import org.opengis.referencing.datum.PixelInCell;
 
-import com.mango.tms.Utils;
-
-/**
- * Code to build a pyramid from a gdal_retile output
- * 
- * @author Andrea Aime - GeoSolutions SAS
- * @author Simone Giannecchini, GeoSolutions SAS
- *
- */
 class Utils {
 
 	static final Logger LOGGER = Logging.getLogger(Utils.class);
@@ -97,8 +86,6 @@ class Utils {
 		}
 
 		public int compareTo(MosaicInfo other) {
-			// we make an easy comparison against the x resolution, we'll do a sanity
-			// check about the y resolution later
 			return resolutions[0] > other.resolutions[0] ? 1 : -1;
 		}
 	}
@@ -121,15 +108,11 @@ class Utils {
 		return checkSource(source, null);
 	}
 
+	@SuppressWarnings("deprecation")
 	static URL checkSource(Object source, Hints hints) {
 		URL sourceURL = null;
 		File sourceFile = null;
 		try {
-			//
-			// Check source
-			//
-			// if it is a URL or a String let's try to see if we can get a file to
-			// check if we have to build the index
 			if (source instanceof File) {
 				sourceFile = (File) source;
 				sourceURL = sourceFile.toURL();
@@ -139,11 +122,9 @@ class Utils {
 					sourceFile = new File(sourceURL.toURI());
 				}
 			} else if (source instanceof String) {
-				// is it a File?
 				final String tempSource = (String) source;
 				File tempFile = new File(tempSource);
 				if (!tempFile.exists()) {
-					// is it a URL
 					try {
 						sourceURL = new URL(tempSource);
 						source = new File(sourceURL.toURI());
@@ -156,7 +137,6 @@ class Utils {
 					sourceFile = tempFile;
 				}
 			} else {
-				// we really don't know how to convert the thing... give up
 				if (LOGGER.isLoggable(Level.WARNING)) {
 					LOGGER.warning("we really don't know how to convert the thing:" + source != null ? source.toString()
 							: "null");
@@ -164,7 +144,6 @@ class Utils {
 				return null;
 			}
 
-			// logging
 			if (LOGGER.isLoggable(Level.INFO)) {
 				if (sourceFile != null) {
 					final String message = fileStatus(sourceFile);
@@ -172,22 +151,14 @@ class Utils {
 				}
 			}
 
-			//
-			// Handle cases where the pyramid descriptor file already exists
-			//
-			// can't do anything with it
 			if (sourceFile == null || !sourceFile.exists())
 				return sourceURL;
 
-			// if it's already a file we don't need to adjust it, will try to open as is
 			if (!sourceFile.isDirectory())
 				return sourceURL;
 
-			// it's a directory, let's see if it already has a pyramid description file
-			// inside
 			File directory = sourceFile;
 			sourceFile = new File(directory, directory.getName() + ".properties");
-			// logging
 			if (LOGGER.isLoggable(Level.INFO)) {
 				if (sourceFile != null) {
 					final String message = fileStatus(sourceFile);
@@ -197,18 +168,11 @@ class Utils {
 			if (sourceFile.exists())
 				return sourceFile.toURL();
 
-			//
-			// Try to build the sub-folders mosaics
-			//
-			// if the structure of the directories is gdal_retile like, move the root files
-			// in their
-			// own sub directory
 			File zeroLevelDirectory = new File(directory, "0");
 			IOFileFilter directoryFilter = FileFilterUtils.directoryFileFilter();
 			File[] numericDirectories = directory.listFiles(new NumericDirectoryFilter());
 			File[] directories = directory.listFiles((FileFilter) directoryFilter);
 
-			// do we have at least one sub-directory?
 			if (directories.length == 0) {
 				if (LOGGER.isLoggable(Level.INFO)) {
 					LOGGER.info("I was unable to determine a structure similar to the GDAL Retile one!!");
@@ -216,7 +180,6 @@ class Utils {
 				return null;
 			}
 
-			// check the gdal case and move files if necessary
 			if (!zeroLevelDirectory.exists() && numericDirectories.length == directories.length) {
 				LOGGER.log(Level.INFO,
 						"Detected gdal_retile file structure, " + "moving root files to the '0' subdirectory");
@@ -249,8 +212,6 @@ class Utils {
 				}
 			}
 
-			// scan each subdirectory and try to build a mosaic in it, accumulate the
-			// resulting mosaics
 			List<MosaicInfo> mosaics = new ArrayList<MosaicInfo>();
 			ImageMosaicFormat mosaicFactory = new ImageMosaicFormat();
 			for (File subdir : directories) {
@@ -266,13 +227,9 @@ class Utils {
 				}
 			}
 
-			// do we have at least one level?
 			if (mosaics.size() == 0)
 				return null;
 
-			// sort the mosaics by resolution and check they are actually in ascending
-			// resolution order
-			// for both X and Y resolutions
 			Collections.sort(mosaics);
 			for (int i = 1; i < mosaics.size(); i++) {
 				double[] resprev = mosaics.get(i - 1).getResolutions();
@@ -286,10 +243,6 @@ class Utils {
 				}
 			}
 
-			//
-			// We have everything we need, build the final pyramid descriptor info
-			//
-			// build the property file
 			Properties properties = new Properties();
 			properties.put("Name", directory.getName());
 			properties.put("LevelsNum", String.valueOf(mosaics.size()));
@@ -338,14 +291,6 @@ class Utils {
 		return sourceURL;
 	}
 
-	/**
-	 * Prepares a message with the status of the provided file.
-	 * 
-	 * @param sourceFile The {@link File} to provided the status message for
-	 * @return a status message for the provided {@link File} or a
-	 *         {@link NullPointerException} in case the {@link File}is
-	 *         <code>null</code>.
-	 */
 	private static String fileStatus(File sourceFile) {
 //        if(sourceFile==null){
 //            throw new NullPointerException("Provided null input to fileStatus method");
@@ -363,9 +308,6 @@ class Utils {
 		return "";
 	}
 
-	/**
-	 * Stores informations about a mosaic
-	 */
 //    static class MosaicInfo implements Comparable<MosaicInfo>{
 //        @Override
 //        public String toString() {
@@ -405,11 +347,5 @@ class Utils {
 //            return resolutions[0] > other.resolutions[0] ? 1 : -1;
 //        }
 //    }
-
-	/**
-	 * A file filter that only returns directories whose name is an integer number
-	 * 
-	 * @author Andrea Aime - OpenGeo
-	 */
 
 }
