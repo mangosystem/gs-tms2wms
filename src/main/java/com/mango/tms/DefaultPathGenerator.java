@@ -2,26 +2,18 @@ package com.mango.tms;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-
-import javax.imageio.ImageIO;
 
 import org.geotools.geometry.GeneralEnvelope;
 
-public class DefaultPathGenerator extends TMSPathGenerator {
+public class DefaultPathGenerator extends PathGenerator {
 
+	@SuppressWarnings("unused")
 	public BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
 			int reqHeight) {
 //		level = fTG.getResolutions().length - level;
@@ -172,77 +164,77 @@ public class DefaultPathGenerator extends TMSPathGenerator {
 		return bi;
 	}
 
-	public BufferedImage getTileImage(TileGenerator fTG, Tile tile) {
-		tile.setLevel(tile.getLevel() + (fTG.getfServceStartLevel() - 1));
-		String path = buildPath(tile);
-//		System.out.println(path);
-
-		if (!tile.isInclude()) {
-//			System.out.println("BLANK");
-			return fTG.getBlank();
-		}
-
-		String cacheFilePath = "";
-		try {
-			if (fTG.isTileCache()) {
-				if (fTG.getCahcePath().endsWith(File.separator)) {
-					cacheFilePath = fTG.getCahcePath().substring(0, fTG.getCahcePath().length() - 1) + shortPath(tile);
-				} else {
-					cacheFilePath = fTG.getCahcePath() + shortPath(tile);
-				}
-				if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
-						|| cacheFilePath.toLowerCase().endsWith("gif"))) {
-					cacheFilePath = cacheFilePath + "." + fTG.getfImageFormat();
-				}
-				// cacheFilePath = fTG.getCahcePath() + shortPath(tile);
-				File cacheFile = new File(new URI(cacheFilePath));
-				if (cacheFile.exists()) {
-					// System.out.println(cacheFilePath);
-					return ImageIO.read(cacheFile);
-				}
-			}
-		} catch (Exception e) {
-			//e.printStackTrace();
-		}
-
-		try {
-			{
-				URL u = new URL(path);
-				HttpURLConnection conn = (HttpURLConnection) u.openConnection();
-				InputStream is = null;
-				// Referer:http://map.vworld.kr/map/maps.do
-				conn.addRequestProperty("User-Agent",
-						"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36");
-				if (conn.getResponseCode() == 200) {
-					is = conn.getInputStream();
-					BufferedImage bi = ImageIO.read(is);
-					is.close();
-					conn.disconnect();
-
-					if (fTG.isTileCache()) {
-						if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
-								|| cacheFilePath.toLowerCase().endsWith("gif"))) {
-							cacheFilePath = cacheFilePath + ".jpg";
-						}
-						File f = new File(new URI(cacheFilePath));
-						f.mkdirs();
-						String format = path.substring(path.lastIndexOf(".") + 1);
-						if (!(format.endsWith("png") || format.endsWith("jpg") || format.endsWith("gif"))) {
-							format = fTG.getfImageFormat();
-						}
-						ImageIO.write(bi, format, f);
-					}
-
-					return bi;
-				} else {
-					return fTG.getBlank();
-				}
-
-				// InputStream is = conn.getInputStream();
-			}
-		} catch (Exception e) {
-			//e.printStackTrace();
-			return fTG.getBlank();
-		}
-	}
+//	public BufferedImage getTileImage(TileGenerator fTG, Tile tile) {
+//		tile.setLevel(tile.getLevel() + (fTG.getfServceStartLevel() - 1));
+//		String path = buildPath(tile);
+////		System.out.println(path);
+//
+//		if (!tile.isInclude()) {
+////			System.out.println("BLANK");
+//			return fTG.getBlank();
+//		}
+//
+//		String cacheFilePath = "";
+//		try {
+//			if (fTG.isTileCache()) {
+//				if (fTG.getCahcePath().endsWith(File.separator)) {
+//					cacheFilePath = fTG.getCahcePath().substring(0, fTG.getCahcePath().length() - 1) + shortPath(tile);
+//				} else {
+//					cacheFilePath = fTG.getCahcePath() + shortPath(tile);
+//				}
+//				if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
+//						|| cacheFilePath.toLowerCase().endsWith("gif"))) {
+//					cacheFilePath = cacheFilePath + "." + fTG.getfImageFormat();
+//				}
+//				// cacheFilePath = fTG.getCahcePath() + shortPath(tile);
+//				File cacheFile = new File(new URI(cacheFilePath));
+//				if (cacheFile.exists()) {
+//					// System.out.println(cacheFilePath);
+//					return ImageIO.read(cacheFile);
+//				}
+//			}
+//		} catch (Exception e) {
+//			//e.printStackTrace();
+//		}
+//
+//		try {
+//			{
+//				URL u = new URL(path);
+//				HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+//				InputStream is = null;
+//				// Referer:http://map.vworld.kr/map/maps.do
+//				conn.addRequestProperty("User-Agent",
+//						"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36");
+//				if (conn.getResponseCode() == 200) {
+//					is = conn.getInputStream();
+//					BufferedImage bi = ImageIO.read(is);
+//					is.close();
+//					conn.disconnect();
+//
+//					if (fTG.isTileCache()) {
+//						if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
+//								|| cacheFilePath.toLowerCase().endsWith("gif"))) {
+//							cacheFilePath = cacheFilePath + ".jpg";
+//						}
+//						File f = new File(new URI(cacheFilePath));
+//						f.mkdirs();
+//						String format = path.substring(path.lastIndexOf(".") + 1);
+//						if (!(format.endsWith("png") || format.endsWith("jpg") || format.endsWith("gif"))) {
+//							format = fTG.getfImageFormat();
+//						}
+//						ImageIO.write(bi, format, f);
+//					}
+//
+//					return bi;
+//				} else {
+//					return fTG.getBlank();
+//				}
+//
+//				// InputStream is = conn.getInputStream();
+//			}
+//		} catch (Exception e) {
+//			//e.printStackTrace();
+//			return fTG.getBlank();
+//		}
+//	}
 }

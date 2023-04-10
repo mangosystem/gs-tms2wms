@@ -7,8 +7,7 @@ import java.util.Properties;
 
 import org.geotools.geometry.GeneralEnvelope;
 
-public class ArcPathGenerator extends TMSPathGenerator implements
-		IPathGenerator {
+public class ArcPathGenerator extends PathGenerator {
 
 	private String fURLPattern;
 

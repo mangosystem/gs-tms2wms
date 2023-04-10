@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 
 import org.geotools.geometry.GeneralEnvelope;
 
-public class TMSPathGenerator extends PathGenerator implements IPathGenerator {
+public class TMSPathGenerator extends PathGenerator {
 
 	public BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
 			int reqHeight) {

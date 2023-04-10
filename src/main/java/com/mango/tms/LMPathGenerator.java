@@ -3,8 +3,6 @@ package com.mango.tms;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.List;
 import java.util.Properties;
 
 import org.geotools.geometry.GeneralEnvelope;

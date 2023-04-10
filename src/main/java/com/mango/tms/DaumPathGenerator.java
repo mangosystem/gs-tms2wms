@@ -2,15 +2,12 @@ package com.mango.tms;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.List;
 import java.util.Properties;
 
 import org.geotools.geometry.GeneralEnvelope;
@@ -71,6 +68,7 @@ public class DaumPathGenerator implements IPathGenerator {
 		return realPath;
 	}
 
+	@SuppressWarnings("unused")
 	public BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
 			int reqHeight) {
 //		level = fTG.getResolutions().length - level;
