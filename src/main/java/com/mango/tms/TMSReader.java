@@ -455,7 +455,7 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 //		return highestRes;
 //	}
 
-	public int getLevel(double minX, double minY, double maxX, double maxY, int width, int height) {
+	public int getLevel1(double minX, double minY, double maxX, double maxY, int width, int height) {
 		double[] resSet = fTG.getResolutions();
 		double res = (maxX - minX) / (double) width;
 		double delta = Double.NaN;
@@ -472,6 +472,29 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 			}
 		}
 		return level + 1;
+	}
+	
+	public int getLevel(double minX, double minY, double maxX, double maxY, int width, int height) {
+	    double[] resolutions = fTG.getResolutions();
+	    double targetResolution = (maxX - minX) / (double) width;
+	    int level = resolutions.length - 1;
+	    double smallestResolutionDifference = Double.MAX_VALUE;
+
+	    for (int i = resolutions.length - 1; i >= 0; i--) {
+	        double resolutionDifference = Math.abs(resolutions[i] - targetResolution);
+	        if (resolutionDifference < smallestResolutionDifference) {
+	            smallestResolutionDifference = resolutionDifference;
+	            level = i;
+	        }
+	    }
+	    //System.out.println("minX : " + minX);
+	    //System.out.println("minY : " + minY);
+	    //System.out.println("maxX : " + maxX);
+	    //System.out.println("maxY : " + maxY);
+	    System.out.println("smallestResolutionDifference : " + smallestResolutionDifference);
+	    System.out.println("selectResolutionDifference : " + resolutions[level]);
+	    System.out.println("lvl : " + (level + 1));
+	    return level + 1;
 	}
 
 }
