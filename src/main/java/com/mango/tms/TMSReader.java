@@ -18,13 +18,19 @@ package com.mango.tms;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.media.jai.PlanarImage;
+import javax.media.jai.RenderedOp;
 
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -33,15 +39,22 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
+import org.geotools.filter.FunctionFinder;
+import org.geotools.filter.LiteralExpressionImpl;
 import org.geotools.gce.imagemosaic.ImageMosaicReader;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.util.factory.Hints;
 import org.opengis.coverage.grid.Format;
 import org.opengis.coverage.grid.GridCoverageReader;
+import org.opengis.filter.expression.Expression;
+import org.opengis.filter.expression.Function;
+import org.opengis.filter.expression.Literal;
 import org.opengis.geometry.Envelope;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
+
+import it.geosolutions.jaiext.BufferedImageAdapter;
 
 public final class TMSReader extends AbstractGridCoverage2DReader implements GridCoverageReader {
 
@@ -60,9 +73,9 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 			this.hints.add(uHints);
 		}
 		this.hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
-		
+
 		this.coverageFactory = CoverageFactoryFinder.getGridCoverageFactory(this.hints);
-		
+
 		FileInputStream fis = new FileInputStream((File) source);
 		Properties prop = new Properties();
 		prop.load(fis);
@@ -201,6 +214,15 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 				}
 			}
 		}
+		
+		FunctionFinder ff = new FunctionFinder(null);
+		List<Expression> exps = new ArrayList<>();
+		Literal l = new LiteralExpressionImpl("lpath");
+		exps.add(l);
+		Function envFunc = ff.findFunction("env", exps);
+		String lpath = envFunc.evaluate("lpath", String.class);
+		
+		System.out.println("<< lpath : " + lpath + " >>");
 
 		ReferencedEnvelope transformedEnvelope = null;
 		if (!CRS.equalsIgnoreMetadata(requestedEnvelope1.getCoordinateReferenceSystem(), fTG.getTileCRS())) {
@@ -248,6 +270,12 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		// g.getColor().getRed() +":" + g.getColor().getGreen() +":" +
 		// g.getColor().getBlue() +
 		// "======================================================================================================================================================================================================================================================");
+//		RenderedImage ri = null;
+//		try {
+//			ri = new BufferedImageAdapter(bi);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		return (new GridCoverageFactory()).create(fTG.getName(), bi, requestedEnvelope1);
 
 		// GeneralEnvelope requestedEnvelope = null;
@@ -473,28 +501,28 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		}
 		return level + 1;
 	}
-	
-	public int getLevel(double minX, double minY, double maxX, double maxY, int width, int height) {
-	    double[] resolutions = fTG.getResolutions();
-	    double targetResolution = (maxX - minX) / (double) width;
-	    int level = resolutions.length - 1;
-	    double smallestResolutionDifference = Double.MAX_VALUE;
 
-	    for (int i = resolutions.length - 1; i >= 0; i--) {
-	        double resolutionDifference = Math.abs(resolutions[i] - targetResolution);
-	        if (resolutionDifference < smallestResolutionDifference) {
-	            smallestResolutionDifference = resolutionDifference;
-	            level = i;
-	        }
-	    }
-	    //System.out.println("minX : " + minX);
-	    //System.out.println("minY : " + minY);
-	    //System.out.println("maxX : " + maxX);
-	    //System.out.println("maxY : " + maxY);
-	    System.out.println("smallestResolutionDifference : " + smallestResolutionDifference);
-	    System.out.println("selectResolutionDifference : " + resolutions[level]);
-	    System.out.println("lvl : " + (level + 1));
-	    return level + 1;
+	public int getLevel(double minX, double minY, double maxX, double maxY, int width, int height) {
+		double[] resolutions = fTG.getResolutions();
+		double targetResolution = (maxX - minX) / (double) width;
+		int level = resolutions.length - 1;
+		double smallestResolutionDifference = Double.MAX_VALUE;
+
+		for (int i = resolutions.length - 1; i >= 0; i--) {
+			double resolutionDifference = Math.abs(resolutions[i] - targetResolution);
+			if (resolutionDifference < smallestResolutionDifference) {
+				smallestResolutionDifference = resolutionDifference;
+				level = i;
+			}
+		}
+		// System.out.println("minX : " + minX);
+		// System.out.println("minY : " + minY);
+		// System.out.println("maxX : " + maxX);
+		// System.out.println("maxY : " + maxY);
+		System.out.println("smallestResolutionDifference : " + smallestResolutionDifference);
+		System.out.println("selectResolutionDifference : " + resolutions[level]);
+		System.out.println("lvl : " + (level + 1));
+		return level + 1;
 	}
 
 }

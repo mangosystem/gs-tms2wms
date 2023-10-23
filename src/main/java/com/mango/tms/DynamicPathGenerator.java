@@ -2,40 +2,23 @@ package com.mango.tms;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-
-import javax.imageio.ImageIO;
-import javax.net.ssl.HttpsURLConnection;
 
 import org.geotools.geometry.GeneralEnvelope;
 
-public class DawlPathGenerator extends TMSPathGenerator {
+public class DynamicPathGenerator extends PathGenerator {
 
+	@SuppressWarnings("unused")
 	public BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
 			int reqHeight) {
 //		level = fTG.getResolutions().length - level;
 		double[] resSet = fTG.getResolutions();
-		int lidx = 0;
-		//for(double res : resSet) {
-		//	System.out.println(lidx + ":" +res);
-		//	lidx ++;
-		//}
-		System.out.println("res level idx : " + level);
-		double res = resSet[level -1];
-		//System.out.println("level : " + level);
-		//System.out.println("res : " + res);
+		double res = resSet[level - 1];
 		double reqHalfRealWidth = reqWidth / 2 * res;
 		double reqHalfRealHeight = reqHeight / 2 * res;
 		double tileRealwidth = fTG.getTileWidth() * res;
@@ -181,132 +164,77 @@ public class DawlPathGenerator extends TMSPathGenerator {
 		return bi;
 	}
 
-	public BufferedImage getTileImage(TileGenerator fTG, Tile tile) {
-		tile.setLevel(tile.getLevel() + (fTG.getfServceStartLevel() - 1));
-		String path = buildPath(tile);
-		//System.out.println(path);
-
-		if (!tile.isInclude()) {
-//			System.out.println("BLANK");
-			return fTG.getBlank();
-		}
-
-		String cacheFilePath = "";
-		try {
-			if (fTG.isTileCache()) {
-				if (fTG.getCahcePath().endsWith(File.separator)) {
-					cacheFilePath = fTG.getCahcePath().substring(0, fTG.getCahcePath().length() - 1) + shortPath(tile);
-				} else {
-					cacheFilePath = fTG.getCahcePath() + shortPath(tile);
-				}
-				if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
-						|| cacheFilePath.toLowerCase().endsWith("gif"))) {
-					cacheFilePath = cacheFilePath + "." + fTG.getfImageFormat();
-				}
-				// cacheFilePath = fTG.getCahcePath() + shortPath(tile);
-				File cacheFile = new File(new URI(cacheFilePath));
-				if (cacheFile.exists()) {
-					// System.out.println(cacheFilePath);
-					return ImageIO.read(cacheFile);
-				}
-			}
-		} catch (Exception e) {
-			// e.printStackTrace();
-		}
-
-		try {
-			{
-				System.out.println(path);
-				URL u = new URL(path);
-				HttpURLConnection conn;
-
-				if (u.getProtocol().equals("https")) {
-					// HTTPS 연결
-					conn = (HttpsURLConnection) u.openConnection();
-				} else {
-					// HTTP 연결
-					conn = (HttpURLConnection) u.openConnection();
-				}
-				InputStream is = null;
-				// Referer:http://map.vworld.kr/map/maps.do
-				conn.addRequestProperty("User-Agent",
-						"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36");
-				if (conn.getResponseCode() == 200) {
-					is = conn.getInputStream();
-					BufferedImage bi = ImageIO.read(is);
-					is.close();
-					conn.disconnect();
-
-					if (fTG.isTileCache()) {
-						if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
-								|| cacheFilePath.toLowerCase().endsWith("gif"))) {
-							cacheFilePath = cacheFilePath + ".jpg";
-						}
-						File f = new File(new URI(cacheFilePath));
-						f.mkdirs();
-						String format = path.substring(path.lastIndexOf(".") + 1);
-						if (!(format.endsWith("png") || format.endsWith("jpg") || format.endsWith("gif"))) {
-							format = fTG.getfImageFormat();
-						}
-						ImageIO.write(bi, format, f);
-					}
-
-					return bi;
-				} else {
-					return fTG.getBlank();
-				}
-
-				// InputStream is = conn.getInputStream();
-			}
-		} catch (Exception e) {
-			//e.printStackTrace();
-			return fTG.getBlank();
-		}
-	}
-
-	public String buildPath(Tile tile) {
-		int sidx = 0;
-		try {
-			sidx = (int) (Math.random() * 4d) + tile.getTileGenerator().getfUrlServerStart();
-		} catch (Exception e) {
-
-		}
-		String server = "" + sidx;
-		String level = Integer.toString(tile.getLevel() - 1);
-		String row = Integer.toString(tile.getGridY());
-		String col = Integer.toString(tile.getGridX());
-		String mrow = Integer.toString(tile.getGridY() / 50);
-		String mcol = Integer.toString(tile.getGridX() / 50);
-
-		String realPath = replaceVariables(fURLPattern, "%SERVER%", server);
-//		String realPath = fURLPattern;
-		realPath = replaceVariables(realPath, "%LEVEL%", level);
-		realPath = replaceVariables(realPath, "%MROW%", mrow);
-		realPath = replaceVariables(realPath, "%MCOL%", mcol);
-		realPath = replaceVariables(realPath, "%ROW%", row);
-		realPath = replaceVariables(realPath, "%COL%", col);
-		System.out.println(realPath);
-		return realPath;
-	}
-	
-	public String shortPath(Tile tile) {
-		String realPath = "" + "/";
-
-		String level = "" + Integer.toString(tile.getLevel());
-		String row = Integer.toString(tile.getGridY());
-		String col = Integer.toString(tile.getGridX());
-
-		int lvlIdx = fURLPattern.indexOf("%LEVEL%");
-		int realPathStartIdx = fURLPattern.substring(0, lvlIdx).lastIndexOf("/");
-		String subPath = fURLPattern.substring(realPathStartIdx + 1);
-		subPath = replaceVariables(subPath, "%LEVEL%", level);
-		subPath = replaceVariables(subPath, "%ROW%", row);
-		subPath = replaceVariables(subPath, "%COL%", col);
-
-		realPath = realPath + level + "/" + row + "/" + col;
-//		realPath = realPath + level + "/";
-//		realPath = realPath + col + "/";
-//		realPath = realPath + row + (fURLPattern.substring(fURLPattern.lastIndexOf(".")));
-		return realPath;
-	}
+//	public BufferedImage getTileImage(TileGenerator fTG, Tile tile) {
+//		tile.setLevel(tile.getLevel() + (fTG.getfServceStartLevel() - 1));
+//		String path = buildPath(tile);
+////		System.out.println(path);
+//
+//		if (!tile.isInclude()) {
+////			System.out.println("BLANK");
+//			return fTG.getBlank();
+//		}
+//
+//		String cacheFilePath = "";
+//		try {
+//			if (fTG.isTileCache()) {
+//				if (fTG.getCahcePath().endsWith(File.separator)) {
+//					cacheFilePath = fTG.getCahcePath().substring(0, fTG.getCahcePath().length() - 1) + shortPath(tile);
+//				} else {
+//					cacheFilePath = fTG.getCahcePath() + shortPath(tile);
+//				}
+//				if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
+//						|| cacheFilePath.toLowerCase().endsWith("gif"))) {
+//					cacheFilePath = cacheFilePath + "." + fTG.getfImageFormat();
+//				}
+//				// cacheFilePath = fTG.getCahcePath() + shortPath(tile);
+//				File cacheFile = new File(new URI(cacheFilePath));
+//				if (cacheFile.exists()) {
+//					// System.out.println(cacheFilePath);
+//					return ImageIO.read(cacheFile);
+//				}
+//			}
+//		} catch (Exception e) {
+//			//e.printStackTrace();
+//		}
+//
+//		try {
+//			{
+//				URL u = new URL(path);
+//				HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+//				InputStream is = null;
+//				// Referer:http://map.vworld.kr/map/maps.do
+//				conn.addRequestProperty("User-Agent",
+//						"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36");
+//				if (conn.getResponseCode() == 200) {
+//					is = conn.getInputStream();
+//					BufferedImage bi = ImageIO.read(is);
+//					is.close();
+//					conn.disconnect();
+//
+//					if (fTG.isTileCache()) {
+//						if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
+//								|| cacheFilePath.toLowerCase().endsWith("gif"))) {
+//							cacheFilePath = cacheFilePath + ".jpg";
+//						}
+//						File f = new File(new URI(cacheFilePath));
+//						f.mkdirs();
+//						String format = path.substring(path.lastIndexOf(".") + 1);
+//						if (!(format.endsWith("png") || format.endsWith("jpg") || format.endsWith("gif"))) {
+//							format = fTG.getfImageFormat();
+//						}
+//						ImageIO.write(bi, format, f);
+//					}
+//
+//					return bi;
+//				} else {
+//					return fTG.getBlank();
+//				}
+//
+//				// InputStream is = conn.getInputStream();
+//			}
+//		} catch (Exception e) {
+//			//e.printStackTrace();
+//			return fTG.getBlank();
+//		}
+//	}
 }
