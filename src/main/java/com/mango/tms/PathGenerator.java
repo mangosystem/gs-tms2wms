@@ -19,10 +19,10 @@ import javax.imageio.ImageIO;
 
 import org.geotools.geometry.GeneralEnvelope;
 
-public class PathGenerator implements IPathGenerator{
+public class PathGenerator implements IPathGenerator {
 
 	public String fURLPattern;
-	
+
 	public void init(Properties props) {
 		String value = props.getProperty("url.pattern");
 		if (value == null) {
@@ -82,7 +82,7 @@ public class PathGenerator implements IPathGenerator{
 //		realPath = realPath + row + (fURLPattern.substring(fURLPattern.lastIndexOf(".")));
 		return realPath;
 	}
-	
+
 	public BufferedImage getTileImage(TileGenerator fTG, Tile tile) {
 		tile.setLevel(tile.getLevel() + (fTG.getfServceStartLevel() - 1));
 		String path = buildPath(tile);
@@ -114,35 +114,62 @@ public class PathGenerator implements IPathGenerator{
 		try {
 			{
 				URL u = new URL(path);
-				HttpURLConnection conn = (HttpURLConnection) u.openConnection();
-				InputStream is = null;
-				// Referer:http://map.vworld.kr/map/maps.do
-				conn.addRequestProperty("User-Agent",
-						"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36");
-				if (conn.getResponseCode() == 200) {
-					is = conn.getInputStream();
-					BufferedImage bi = ImageIO.read(is);
-					is.close();
-					conn.disconnect();
+				String protocol = u.getProtocol().toLowerCase();
+				BufferedImage bi = null;
+				if("http".equals(protocol) || "https".equals(protocol)) {
+					HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+					InputStream is = null;
+					// Referer:http://map.vworld.kr/map/maps.do
+					conn.addRequestProperty("User-Agent",
+							"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36");
+					if (conn.getResponseCode() == 200) {
+						is = conn.getInputStream();
+						bi = ImageIO.read(is);
+						is.close();
+						conn.disconnect();
 
-					if (fTG.isTileCache()) {
-						if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
-								|| cacheFilePath.toLowerCase().endsWith("gif"))) {
-							cacheFilePath = cacheFilePath + ".jpg";
+						if (fTG.isTileCache()) {
+							if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
+									|| cacheFilePath.toLowerCase().endsWith("gif"))) {
+								cacheFilePath = cacheFilePath + ".jpg";
+							}
+							File f = new File(new URI(cacheFilePath));
+							f.mkdirs();
+							String format = path.substring(path.lastIndexOf(".") + 1);
+							if (!(format.endsWith("png") || format.endsWith("jpg") || format.endsWith("gif"))) {
+								format = fTG.getfImageFormat();
+							}
+							ImageIO.write(bi, format, f);
 						}
-						File f = new File(new URI(cacheFilePath));
-						f.mkdirs();
-						String format = path.substring(path.lastIndexOf(".") + 1);
-						if (!(format.endsWith("png") || format.endsWith("jpg") || format.endsWith("gif"))) {
-							format = fTG.getfImageFormat();
-						}
-						ImageIO.write(bi, format, f);
+
+						//return bi;
+					} else {
+						bi = fTG.getBlank();
 					}
-
-					return bi;
 				} else {
-					return fTG.getBlank();
+					File imgFile = new File(u.toURI());
+					if(imgFile.exists()) {
+						bi = ImageIO.read(u);
+					} else {
+						bi = fTG.getBlank();
+					}
 				}
+				
+				if (fTG.isTileCache()) {
+					if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
+							|| cacheFilePath.toLowerCase().endsWith("gif"))) {
+						cacheFilePath = cacheFilePath + ".jpg";
+					}
+					File f = new File(new URI(cacheFilePath));
+					f.mkdirs();
+					String format = path.substring(path.lastIndexOf(".") + 1);
+					if (!(format.endsWith("png") || format.endsWith("jpg") || format.endsWith("gif"))) {
+						format = fTG.getfImageFormat();
+					}
+					ImageIO.write(bi, format, f);
+				}
+				
+				return bi;
 			}
 		} catch (Exception e) {
 			return fTG.getBlank();
