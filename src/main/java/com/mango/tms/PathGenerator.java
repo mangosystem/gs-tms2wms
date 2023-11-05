@@ -131,7 +131,7 @@ public class PathGenerator implements IPathGenerator {
 				if("http".equals(protocol) || "https".equals(protocol)) {
 					HttpURLConnection conn = (HttpURLConnection) u.openConnection();
 					conn.setConnectTimeout(1000);
-					conn.setReadTimeout(100);
+					conn.setReadTimeout(300);
 					InputStream is = null;
 					// Referer:http://map.vworld.kr/map/maps.do
 					conn.addRequestProperty("User-Agent",
