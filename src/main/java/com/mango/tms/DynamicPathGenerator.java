@@ -60,7 +60,7 @@ public class DynamicPathGenerator extends PathGenerator {
 		realPath = replaceVariables(realPath, "%ROW%", row);
 		realPath = replaceVariables(realPath, "%COL%", col);
 		//if(is) {
-			System.out.println(realPath);
+		//	System.out.println(realPath);
 		//}
 		return realPath;
 	}
