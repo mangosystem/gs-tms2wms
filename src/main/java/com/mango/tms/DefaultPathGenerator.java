@@ -8,11 +8,12 @@ import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
+import java.util.Properties;
 
 import org.geotools.geometry.GeneralEnvelope;
 
 public class DefaultPathGenerator extends PathGenerator {
-
+	
 	@SuppressWarnings("unused")
 	public BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
 			int reqHeight) {

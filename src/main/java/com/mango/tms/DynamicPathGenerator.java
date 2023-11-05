@@ -8,11 +8,20 @@ import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
+import java.util.Properties;
 
 import org.geotools.geometry.GeneralEnvelope;
 
 public class DynamicPathGenerator extends PathGenerator {
 	private String pattern = null;
+
+	public void init(Properties props) {
+		super.init(props);
+		String value = props.getProperty("url.pattern.dynamic");
+		if (value != null) {
+			fURLPattern = value;
+		}
+	}
 
 	public String getPattern() {
 		return pattern;
@@ -26,6 +35,7 @@ public class DynamicPathGenerator extends PathGenerator {
 			int reqHeight) {
 		return getMap(fTG, level, centerX, centerY, reqWidth, reqHeight, null);
 	}
+
 	@SuppressWarnings("unused")
 	public BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
 			int reqHeight, String pattern) {
@@ -142,7 +152,7 @@ public class DynamicPathGenerator extends PathGenerator {
 
 		for (int y = 0; y < tiles.length; y++) {
 			for (int x = 0; x < tiles[y].length; x++) {
-				//BufferedImage tileImage = getTileImage(fTG, tiles[y][x]);
+				// BufferedImage tileImage = getTileImage(fTG, tiles[y][x]);
 				BufferedImage tileImage = getTileImage(fTG, tiles[y][x], pattern);
 				Rect r = tiles[y][x].getRect();
 				g.drawImage(tileImage, r.getX() + imageOffsetX, r.getY() + imageOffsetY, null);
