@@ -12,10 +12,23 @@ import java.awt.image.BufferedImage;
 import org.geotools.geometry.GeneralEnvelope;
 
 public class DynamicPathGenerator extends PathGenerator {
+	private String pattern = null;
 
-	@SuppressWarnings("unused")
+	public String getPattern() {
+		return pattern;
+	}
+
+	public void setPattern(String pattern) {
+		this.pattern = pattern;
+	}
+
 	public BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
 			int reqHeight) {
+		return getMap(fTG, level, centerX, centerY, reqWidth, reqHeight, null);
+	}
+	@SuppressWarnings("unused")
+	public BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
+			int reqHeight, String pattern) {
 //		level = fTG.getResolutions().length - level;
 		double[] resSet = fTG.getResolutions();
 		double res = resSet[level - 1];
@@ -129,7 +142,8 @@ public class DynamicPathGenerator extends PathGenerator {
 
 		for (int y = 0; y < tiles.length; y++) {
 			for (int x = 0; x < tiles[y].length; x++) {
-				BufferedImage tileImage = getTileImage(fTG, tiles[y][x]);
+				//BufferedImage tileImage = getTileImage(fTG, tiles[y][x]);
+				BufferedImage tileImage = getTileImage(fTG, tiles[y][x], pattern);
 				Rect r = tiles[y][x].getRect();
 				g.drawImage(tileImage, r.getX() + imageOffsetX, r.getY() + imageOffsetY, null);
 			}

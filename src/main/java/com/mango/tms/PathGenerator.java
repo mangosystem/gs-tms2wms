@@ -32,6 +32,9 @@ public class PathGenerator implements IPathGenerator {
 	}
 
 	public static String replaceVariables(String source, String key, String replaceValue) {
+		if(replaceValue == null || "".equalsIgnoreCase(replaceValue)) {
+			return source;
+		}
 		int index = source.indexOf(key);
 		if (index > -1) {
 			String pre = source.substring(0, index);
@@ -40,8 +43,12 @@ public class PathGenerator implements IPathGenerator {
 		}
 		return source;
 	}
-
+	
 	public String buildPath(Tile tile) {
+		return buildPath(tile, null);
+	}
+
+	public String buildPath(Tile tile, String pattern) {
 		//int sidx = 0;
 		//try {
 		//	sidx = (int) (Math.random() * 4d) + tile.getTileGenerator().getfUrlServerStart();
@@ -54,7 +61,8 @@ public class PathGenerator implements IPathGenerator {
 		String col = Integer.toString(tile.getGridX());
 
 		String realPath = fURLPattern;
-//		String realPath = fURLPattern;
+
+		realPath = replaceVariables(realPath, "%PATTERN%", pattern);
 		realPath = replaceVariables(realPath, "%LEVEL%", level);
 		realPath = replaceVariables(realPath, "%ROW%", row);
 		realPath = replaceVariables(realPath, "%COL%", col);
@@ -82,10 +90,14 @@ public class PathGenerator implements IPathGenerator {
 //		realPath = realPath + row + (fURLPattern.substring(fURLPattern.lastIndexOf(".")));
 		return realPath;
 	}
-
+	
 	public BufferedImage getTileImage(TileGenerator fTG, Tile tile) {
+		return getTileImage(fTG, tile, null); 
+	}
+
+	public BufferedImage getTileImage(TileGenerator fTG, Tile tile, String pattern) {
 		tile.setLevel(tile.getLevel() + (fTG.getfServceStartLevel() - 1));
-		String path = buildPath(tile);
+		String path = buildPath(tile, pattern);
 
 		if (!tile.isInclude()) {
 			return fTG.getBlank();

@@ -7,6 +7,8 @@ public interface IPathGenerator {
 
 	String buildPath(Tile tile);
 	
+	//String buildPath(Tile tile, String attern);
+	
 	String shortPath(Tile tile);
 
 	void init(Properties props);

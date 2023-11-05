@@ -209,10 +209,10 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 	
 	public GridCoverage2D read(GeneralParameterValue[] params) throws IOException {
 		String sType = System.getProperty("tms2wms.type", "1");
-		if(sType.equals("1")) {
-			return read1(params);
-		} else {
+		if(sType.equals("2")) {
 			return read2(params);
+		} else {
+			return read1(params);
 		}
 		
 	}
@@ -320,6 +320,15 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		envFunc = ff.findFunction("env", exps);
 		String srs = envFunc.evaluate("wms_srs", String.class);
 
+		
+		l = new LiteralExpressionImpl("pattern");
+		exps.add(l);
+		envFunc = ff.findFunction("env", exps);
+		String pattern = envFunc.evaluate("pattern", String.class);
+		if(pattern == null || "".equals(pattern)) {
+			pattern = "";
+		}
+		
 		if (readers == null) {
 			throw new IllegalStateException("This ImagePyramidReader has already been disposed");
 		}
@@ -367,7 +376,13 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		int height = (int) Math
 				.round(((transformedEnvelope.getMaximum(1) - transformedEnvelope.getMinimum(1)) / resSet[level - 1]));
 
-		BufferedImage bi = fTG.getPathGenerator().getMap(fTG, level, centerx, centery, width, height);
+		BufferedImage bi = null;
+		if(fTG.getPathGenerator() instanceof DynamicPathGenerator) {
+			DynamicPathGenerator dp = (DynamicPathGenerator)fTG.getPathGenerator();
+			bi = dp.getMap(fTG, level, centerx, centery, width, height, pattern);
+		} else {
+			bi = fTG.getPathGenerator().getMap(fTG, level, centerx, centery, width, height);
+		}
 
 		Integer imageChoice = Integer.valueOf(0);
         final ImageReadParam readP = new ImageReadParam();
