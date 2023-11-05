@@ -42,18 +42,18 @@ public class PathGenerator implements IPathGenerator {
 	}
 
 	public String buildPath(Tile tile) {
-		int sidx = 0;
-		try {
-			sidx = (int) (Math.random() * 4d) + tile.getTileGenerator().getfUrlServerStart();
-		} catch (Exception e) {
+		//int sidx = 0;
+		//try {
+		//	sidx = (int) (Math.random() * 4d) + tile.getTileGenerator().getfUrlServerStart();
+		//} catch (Exception e) {
 
-		}
-		String server = "" + sidx;
+		//}
+		//String server = "" + sidx;
 		String level = Integer.toString(tile.getLevel());
 		String row = Integer.toString(tile.getGridY());
 		String col = Integer.toString(tile.getGridX());
 
-		String realPath = replaceVariables(fURLPattern, "%SERVER%", server);
+		String realPath = fURLPattern;
 //		String realPath = fURLPattern;
 		realPath = replaceVariables(realPath, "%LEVEL%", level);
 		realPath = replaceVariables(realPath, "%ROW%", row);
@@ -76,7 +76,7 @@ public class PathGenerator implements IPathGenerator {
 		subPath = replaceVariables(subPath, "%ROW%", row);
 		subPath = replaceVariables(subPath, "%COL%", col);
 
-		realPath = realPath + level + File.separator + row + File.separator + col;
+		realPath = realPath + level + "/" + col + "/" + row;
 //		realPath = realPath + level + "/";
 //		realPath = realPath + col + "/";
 //		realPath = realPath + row + (fURLPattern.substring(fURLPattern.lastIndexOf(".")));
@@ -118,6 +118,8 @@ public class PathGenerator implements IPathGenerator {
 				BufferedImage bi = null;
 				if("http".equals(protocol) || "https".equals(protocol)) {
 					HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+					conn.setConnectTimeout(1000);
+					conn.setReadTimeout(500);
 					InputStream is = null;
 					// Referer:http://map.vworld.kr/map/maps.do
 					conn.addRequestProperty("User-Agent",
