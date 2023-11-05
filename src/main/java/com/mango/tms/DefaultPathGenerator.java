@@ -101,7 +101,7 @@ public class DefaultPathGenerator extends PathGenerator {
 					fullEnv.add(env);
 				}
 
-				boolean include = fTG.getBounds().intersects(env, true);
+				boolean include = fTG.getBounds().intersects(env, false);
 //				System.out.println("x0:" + (new BigDecimal(env.getMinimum(0)).toString()));
 //				System.out.println("y0:" + (new BigDecimal(env.getMinimum(1)).toString()));
 //				System.out.println("x1:" + (new BigDecimal(env.getMaximum(0)).toString()));
