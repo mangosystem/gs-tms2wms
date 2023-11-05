@@ -14,12 +14,12 @@ import org.geotools.geometry.GeneralEnvelope;
 
 public class DynamicPathGenerator extends PathGenerator {
 	private String pattern = null;
-
+	private String fDynamicURLPattern = null;
 	public void init(Properties props) {
 		super.init(props);
 		String value = props.getProperty("url.pattern.dynamic");
 		if (value != null) {
-			fURLPattern = value;
+			fDynamicURLPattern = value;
 		}
 	}
 
@@ -34,6 +34,35 @@ public class DynamicPathGenerator extends PathGenerator {
 	public BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
 			int reqHeight) {
 		return getMap(fTG, level, centerX, centerY, reqWidth, reqHeight, null);
+	}
+	
+	public String buildPath(Tile tile, String pattern) {
+		//int sidx = 0;
+		//try {
+		//	sidx = (int) (Math.random() * 4d) + tile.getTileGenerator().getfUrlServerStart();
+		//} catch (Exception e) {
+
+		//}
+		//String server = "" + sidx;
+		String level = Integer.toString(tile.getLevel());
+		String row = Integer.toString(tile.getGridY());
+		String col = Integer.toString(tile.getGridX());
+
+		String realPath = null;
+		if(pattern != null) {
+			realPath = fDynamicURLPattern;
+		} else {
+			realPath = fURLPattern;
+		}
+
+		realPath = replaceVariables(realPath, "%PATTERN%", pattern);
+		realPath = replaceVariables(realPath, "%LEVEL%", level);
+		realPath = replaceVariables(realPath, "%ROW%", row);
+		realPath = replaceVariables(realPath, "%COL%", col);
+		//if(is) {
+			System.out.println(realPath);
+		//}
+		return realPath;
 	}
 
 	@SuppressWarnings("unused")

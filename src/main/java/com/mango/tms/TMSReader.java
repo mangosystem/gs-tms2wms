@@ -320,13 +320,17 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		envFunc = ff.findFunction("env", exps);
 		String srs = envFunc.evaluate("wms_srs", String.class);
 
-		
+		exps = new ArrayList<>();
 		l = new LiteralExpressionImpl("pattern");
 		exps.add(l);
 		envFunc = ff.findFunction("env", exps);
 		String pattern = envFunc.evaluate("pattern", String.class);
 		if(pattern == null || "".equals(pattern)) {
-			pattern = "";
+			pattern = null;
+		}
+		
+		if(fTG.isOutline()) {
+			System.out.println("PATTERN : " + pattern);
 		}
 		
 		if (readers == null) {
@@ -409,11 +413,6 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		//GridCoverage2D gridCoverage = coverageFactory.create("ImageCoverage", bi, requestedEnvelope1, sampleDimensions);
 		//raster2Model= geMapper.createTransform();
 		
-        GridEnvelope2D gridRange =
-                new GridEnvelope2D(
-                        new Rectangle(
-                                (int) reqWidth,
-                                (int) reqHeight));
         GridEnvelope2D gridRange2 =
                 new GridEnvelope2D(
                         new Rectangle(
