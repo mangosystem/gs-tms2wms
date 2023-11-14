@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
@@ -27,6 +28,14 @@ public class PathGenerator implements IPathGenerator {
 		String value = props.getProperty("url.pattern");
 		if (value == null) {
 			throw new RuntimeException("url.pattern");
+		}
+		fURLPattern = value;
+	}
+	
+	public void init(Map<String, Object> props) {
+		String value = (String)props.get("url_pattern");
+		if (value == null) {
+			throw new RuntimeException("url_pattern");
 		}
 		fURLPattern = value;
 	}
@@ -130,8 +139,8 @@ public class PathGenerator implements IPathGenerator {
 				BufferedImage bi = null;
 				if("http".equals(protocol) || "https".equals(protocol)) {
 					HttpURLConnection conn = (HttpURLConnection) u.openConnection();
-					conn.setConnectTimeout(1000);
-					conn.setReadTimeout(300);
+					//conn.setConnectTimeout(1000);
+					//conn.setReadTimeout(300);
 					InputStream is = null;
 					// Referer:http://map.vworld.kr/map/maps.do
 					conn.addRequestProperty("User-Agent",
@@ -186,6 +195,7 @@ public class PathGenerator implements IPathGenerator {
 				return bi;
 			}
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return fTG.getBlank();
 		}
 	}

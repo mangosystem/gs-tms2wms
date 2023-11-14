@@ -8,6 +8,7 @@ import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 import java.util.Properties;
 
 import org.geotools.geometry.GeneralEnvelope;
@@ -20,6 +21,14 @@ public class DaumPathGenerator implements IPathGenerator {
 		String value = props.getProperty("url.pattern");
 		if (value == null) {
 			throw new RuntimeException("url.pattern");
+		}
+		fURLPattern = value;
+	}
+	
+	public void init(Map<String, Object> props) {
+		String value = (String)props.get("url_pattern");
+		if (value == null) {
+			throw new RuntimeException("url_pattern");
 		}
 		fURLPattern = value;
 	}

@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.imageio.IIOException;
@@ -25,11 +26,21 @@ public class TileGenerator {
 	private final CoordinateReferenceSystem fTileCRS;
 	private BufferedImage fBlank;
 	private final GeneralEnvelope fBounds;
+	private GeneralEnvelope fServiceBounds;
+
+	public GeneralEnvelope getServiceBounds() {
+		return fServiceBounds;
+	}
+
+	public void setServiceBounds(GeneralEnvelope serviceBounds) {
+		this.fServiceBounds = serviceBounds;
+	}
+
 	private IPathGenerator fPathGenerator;
-	private final String fName;
-	private final String fServceMinLevel;
-	private final String fServceMaxLevel;
-	private int fServceStartLevel;
+	private String fName;
+	private Integer fServiceMinLevel;
+	private Integer fServiceMaxLevel;
+	private Integer fServceStartLevel;
 	private String fPathYOrder;
 	private boolean fOutline;
 	private boolean fTileCache;
@@ -128,6 +139,17 @@ public class TileGenerator {
 		fBounds = new GeneralEnvelope(fTileCRS);
 		fBounds.setEnvelope(Double.parseDouble(values[0]), Double.parseDouble(values[1]), Double.parseDouble(values[2]),
 				Double.parseDouble(values[3]));
+
+		String serviceExtent = props.getProperty("serivce.extent");
+		if (serviceExtent == null) {
+			fServiceBounds = null;
+		} else {
+			values = props.getProperty("service.extent").split(",");
+			fServiceBounds = new GeneralEnvelope(fTileCRS);
+			fServiceBounds.setEnvelope(Double.parseDouble(values[0]), Double.parseDouble(values[1]),
+					Double.parseDouble(values[2]), Double.parseDouble(values[3]));
+		}
+
 		value = props.getProperty("path.generator");
 		if (value == null) {
 			throw new RuntimeException("path.generator ");
@@ -164,27 +186,35 @@ public class TileGenerator {
 		}
 		fName = value;
 
-		fServceMinLevel = props.getProperty("service.level.min");
-		fServceMaxLevel = props.getProperty("service.level.max");
+		try {
+			fServiceMinLevel = Integer.parseInt(props.getProperty("service.level.min"));
+		} catch (Exception e) {
+
+		}
+		try {
+			fServiceMaxLevel = Integer.parseInt(props.getProperty("service.level.max"));
+		} catch (Exception e) {
+
+		}
 
 		try {
 			fServceStartLevel = Integer.parseInt(props.getProperty("service.start.level", "1"));
 		} catch (Exception e) {
 			fServceStartLevel = 1;
 		}
-		
+
 		try {
 			fUrlServerCnt = Integer.parseInt(props.getProperty("url.server.count", "4"));
 		} catch (Exception e) {
 			fUrlServerCnt = 4;
 		}
-		
+
 		try {
 			fUrlServerStart = Integer.parseInt(props.getProperty("url.server.start", "0"));
 		} catch (Exception e) {
 			fUrlServerStart = 0;
 		}
-		
+
 		fImageFormat = props.getProperty("image.format", "png");
 
 		value = props.getProperty("outline");
@@ -221,6 +251,161 @@ public class TileGenerator {
 		}
 	}
 
+	public TileGenerator(Map<String, Object> map) throws Exception {
+		String value = (String) map.get("tile_width");
+		if (value == null) {
+			throw new RuntimeException("tile_width ");
+		}
+		fTileWidth = Integer.parseInt(value);
+
+		value = (String) map.get("tile_height");
+		if (value == null) {
+			throw new RuntimeException("tile_height ");
+		}
+		fTileHeight = Integer.parseInt(value);
+
+		value = (String) map.get("tile_origin_x");
+		if (value == null) {
+			throw new RuntimeException("tile_origin_x ");
+		}
+		fTileOriginX = Double.parseDouble(value);
+
+		value = (String) map.get("tile_origin_y");
+		if (value == null) {
+			throw new RuntimeException("tile_origin_y ");
+		}
+		fTileOriginY = Double.parseDouble(value);
+
+		value = (String) map.get("url_y_order");
+		if (value == null || "".equals(value.trim())) {
+			value = (String) map.get("url_y_order");
+			if (value == null || "".equals(value.trim())) {
+				value = "TB";
+			}
+		}
+
+		fPathYOrder = value;
+		if (fPathYOrder == null || "".equals(fPathYOrder)) {
+			fPathYOrder = "TB";
+		}
+		if (!"TB".equalsIgnoreCase(fPathYOrder) && !"BT".equalsIgnoreCase(fPathYOrder)) {
+			throw new Exception("Y_ORDER Policy only [TB] or [BT]");
+		}
+
+		value = (String) map.get("resolutions");
+		String[] values = null;
+		if (value == null || "".equals(value.trim())) {
+			value = (String) map.get("maxresolution");
+			if (value == null || "".equals(value.trim())) {
+				value = (String) map.get("maxResolution");
+			}
+			String zoom = (String) map.get("zoomlevel");
+			fResolutions = new double[Integer.parseInt(zoom.trim())];
+			fResolutions[0] = Double.parseDouble(value.trim());
+			for (int i = 1; i < fResolutions.length; i++) {
+				fResolutions[i] = fResolutions[i - 1] / 2.;
+			}
+		} else {
+			value = (String) map.get("resolutions");
+			values = value.split(",");
+
+			if (values == null || values.length < 1) {
+				throw new RuntimeException("resolutions ");
+			}
+
+			fResolutions = new double[values.length];
+			for (int i = 0; i < values.length; i++) {
+				fResolutions[i] = Double.parseDouble(values[i].trim());
+			}
+		}
+		CoordinateReferenceSystem crs = null;
+		value = (String) map.get("tile_crs_code");
+		if (value != null) {
+			crs = CRS.decode(value);
+		}
+		value = (String) map.get("tile_crs_wkt");
+		if (value != null) {
+			crs = CRS.parseWKT(value);
+		}
+		if (crs == null) {
+			throw new RuntimeException("tile_crs_code or tile_crs_wkt ");
+		}
+		fTileCRS = crs;
+
+		value = (String) map.get("extent");
+		if (value == null) {
+			throw new RuntimeException("extent ");
+		}
+		values = ((String) map.get("extent")).split(",");
+		fBounds = new GeneralEnvelope(fTileCRS);
+		fBounds.setEnvelope(Double.parseDouble(values[0]), Double.parseDouble(values[1]), Double.parseDouble(values[2]),
+				Double.parseDouble(values[3]));
+
+		String serviceExtent = (String) map.get("serivce_extent");
+		if (serviceExtent == null) {
+			fServiceBounds = null;
+		} else {
+			values = ((String) map.get("service_extent")).split(",");
+			fServiceBounds = new GeneralEnvelope(fTileCRS);
+			fServiceBounds.setEnvelope(Double.parseDouble(values[0]), Double.parseDouble(values[1]),
+					Double.parseDouble(values[2]), Double.parseDouble(values[3]));
+		}
+
+		value = (String) map.get("path_generator");
+		if (value == null) {
+			throw new RuntimeException("path_generator ");
+		}
+		fPathGenerator = (IPathGenerator) Class.forName(value).newInstance();
+		fPathGenerator.init(map);
+
+		value = (String) map.get("blank_image_url");
+		if (value != null && !"".equals(value.trim())) {
+			try {
+				File file = new File(value);
+				if (file.exists()) {
+					fBlank = ImageIO.read(file);
+				} else {
+					fBlank = ImageIO.read(new URL(value));
+				}
+			} catch (Exception e) {
+				fBlank = new BufferedImage(fTileWidth, fTileHeight, BufferedImage.TYPE_INT_ARGB);
+				Graphics g = fBlank.getGraphics();
+				g.setColor(new Color(255, 255, 255, 0));
+				g.fillRect(0, 0, fTileWidth, fTileHeight);
+				// throw new RuntimeException("blank.image.url ", e);
+			}
+		} else {
+			fBlank = new BufferedImage(fTileWidth, fTileHeight, BufferedImage.TYPE_INT_ARGB);
+			Graphics g = fBlank.getGraphics();
+			g.setColor(new Color(255, 255, 255, 0));
+			g.fillRect(0, 0, fTileWidth, fTileHeight);
+		}
+
+		value = (String) map.get("layer_name");
+		if (value == null) {
+			value = "unknown";
+		}
+		fName = value;
+
+		try {
+			fServiceMinLevel = Integer.parseInt((String) map.get("service_level_min"));
+		} catch (Exception e) {
+
+		}
+		try {
+			fServiceMaxLevel = Integer.parseInt((String) map.get("service_level_max"));
+		} catch (Exception e) {
+
+		}
+		try {
+			fServceStartLevel = Integer.parseInt((String) map.get("service_start_level"));
+		} catch (Exception e) {
+			fServceStartLevel = 0;
+		}
+
+		fImageFormat = (String) map.get("image_format");
+	}
+
 	public double getOriginX() {
 		return fTileOriginX;
 	}
@@ -248,12 +433,12 @@ public class TileGenerator {
 	public BufferedImage getTileImage(Tile tile) {
 		// System.out.println(fPathGenerator.buildPath(tile));
 		if (!tile.isInclude()) {
-			//System.out.println("BLANK");
+			// System.out.println("BLANK");
 			return fBlank;
 		}
 
 		String path = fPathGenerator.buildPath(tile);
-		//System.out.println(path);
+		// System.out.println(path);
 		String cacheFilePath = "";
 		cacheFilePath = fCahcePath + fPathGenerator.shortPath(tile);
 
@@ -323,12 +508,16 @@ public class TileGenerator {
 		return fName;
 	}
 
-	public String getServceMinLevel() {
-		return fServceMinLevel;
+	public Integer getServiceMinLevel() {
+		return fServiceMinLevel;
 	}
 
-	public String getServceMaxLevel() {
-		return fServceMaxLevel;
+	public Integer getServiceMaxLevel() {
+		return fServiceMaxLevel;
+	}
+
+	public void setServiceMaxLevel(int lvl) {
+		fServiceMaxLevel = lvl;
 	}
 
 	public String getPathYOrder() {

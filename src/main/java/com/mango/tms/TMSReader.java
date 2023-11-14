@@ -24,10 +24,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -56,6 +58,7 @@ import org.geotools.data.DataSourceException;
 import org.geotools.filter.FunctionFinder;
 import org.geotools.filter.LiteralExpressionImpl;
 import org.geotools.gce.imagemosaic.ImageMosaicReader;
+import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.builder.GridToEnvelopeMapper;
@@ -106,16 +109,50 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 
 		super.crs = fTG.getTileCRS();
 		super.originalEnvelope = fTG.getBounds();
+		if (fTG.getServiceBounds() != null) {
+			super.originalEnvelope = fTG.getServiceBounds();
+		}
 		super.originalGridRange = new GridEnvelope2D(0, 0, fTG.getTileWidth(), fTG.getTileHeight());
 		super.coverageName = fTG.getName();
 
 		fis.close();
-		
+
 		final Iterator<ImageReader> it = ImageIO.getImageReadersByFormatName("png");
-        if (!it.hasNext()) throw new DataSourceException("No reader avalaible for this source");
-        final ImageReader reader = it.next();
-        readerSPI = reader.getOriginatingProvider();
-//		 super.originalGridRange = fTG.
+		if (!it.hasNext())
+			throw new DataSourceException("No reader avalaible for this source");
+		final ImageReader reader = it.next();
+		readerSPI = reader.getOriginatingProvider();
+	}
+
+	public TMSReader(Map<String, Object> map, Hints uHints) throws IOException {
+		if (this.hints == null)
+			this.hints = new Hints();
+		if (uHints != null) {
+			this.hints.add(uHints);
+		}
+		this.hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
+
+		this.coverageFactory = CoverageFactoryFinder.getGridCoverageFactory(this.hints);
+
+		try {
+			fTG = new TileGenerator(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		super.crs = fTG.getTileCRS();
+		super.originalEnvelope = fTG.getBounds();
+		if (fTG.getServiceBounds() != null) {
+			super.originalEnvelope = fTG.getServiceBounds();
+		}
+		super.originalGridRange = new GridEnvelope2D(0, 0, fTG.getTileWidth(), fTG.getTileHeight());
+		super.coverageName = fTG.getName();
+
+		final Iterator<ImageReader> it = ImageIO.getImageReadersByFormatName("png");
+		if (!it.hasNext())
+			throw new DataSourceException("No reader avalaible for this source");
+		final ImageReader reader = it.next();
+		readerSPI = reader.getOriginatingProvider();
 	}
 
 	// private void parseMainFile(final URL sourceURL) throws IOException {
@@ -206,15 +243,15 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 	public Format getFormat() {
 		return new TMSFormat();
 	}
-	
+
 	public GridCoverage2D read(GeneralParameterValue[] params) throws IOException {
 		String sType = System.getProperty("tms2wms.type", "1");
-		if(sType.equals("2")) {
+		if (sType.equals("2")) {
 			return read2(params);
 		} else {
 			return read1(params);
 		}
-		
+
 	}
 
 	/*
@@ -248,14 +285,14 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 				}
 			}
 		}
-		
+
 		FunctionFinder ff = new FunctionFinder(null);
 		List<Expression> exps = new ArrayList<>();
 		Literal l = new LiteralExpressionImpl("lpath");
 		exps.add(l);
 		Function envFunc = ff.findFunction("env", exps);
 		String lpath = envFunc.evaluate("lpath", String.class);
-		
+
 		System.out.println("<< lpath : " + lpath + " >>");
 
 		ReferencedEnvelope transformedEnvelope = null;
@@ -285,7 +322,7 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		BufferedImage bi = fTG.getPathGenerator().getMap(fTG, level, centerx, centery, width, height);
 		return (new GridCoverageFactory()).create(fTG.getName(), bi, requestedEnvelope1);
 	}
-	
+
 	public GridCoverage2D read1(GeneralParameterValue[] params) throws IOException {
 		// light check to see if this reader had been disposed, not synching for
 		// performance. We'll check again later on.
@@ -295,19 +332,19 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		exps.add(l);
 		Function envFunc = ff.findFunction("env", exps);
 		ReferencedEnvelope envelope = envFunc.evaluate("wms_bbox", ReferencedEnvelope.class);
-		
+
 		exps = new ArrayList<>();
 		l = new LiteralExpressionImpl("wms_crs");
 		exps.add(l);
 		envFunc = ff.findFunction("env", exps);
 		CoordinateReferenceSystem crs = envFunc.evaluate("wms_crs", CoordinateReferenceSystem.class);
-		
+
 		exps = new ArrayList<>();
 		l = new LiteralExpressionImpl("wms_width");
 		exps.add(l);
 		envFunc = ff.findFunction("env", exps);
 		Integer reqWidth = envFunc.evaluate("wms_width", Integer.class);
-		
+
 		exps = new ArrayList<>();
 		l = new LiteralExpressionImpl("wms_height");
 		exps.add(l);
@@ -325,14 +362,30 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		exps.add(l);
 		envFunc = ff.findFunction("env", exps);
 		String pattern = envFunc.evaluate("pattern", String.class);
-		if(pattern == null || "".equals(pattern)) {
+		if (pattern == null || "".equals(pattern)) {
 			pattern = null;
 		}
-		
-		if(fTG.isOutline()) {
+
+		exps = new ArrayList<>();
+		l = new LiteralExpressionImpl("max_level");
+		exps.add(l);
+		envFunc = ff.findFunction("env", exps);
+		String maxLevelStr = envFunc.evaluate("max_level", String.class);
+		Integer maxLevel = null;
+		if (maxLevelStr == null || "".equals(maxLevelStr)) {
+			maxLevel = null;
+		} else {
+			try {
+				maxLevel = Integer.parseInt(maxLevelStr);
+			} catch (Exception e) {
+
+			}
+		}
+
+		if (fTG.isOutline()) {
 			System.out.println("PATTERN : " + pattern);
 		}
-		
+
 		if (readers == null) {
 			throw new IllegalStateException("This ImagePyramidReader has already been disposed");
 		}
@@ -371,6 +424,18 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		int level = getLevel(transformedEnvelope.getMinimum(0), transformedEnvelope.getMinimum(1),
 				transformedEnvelope.getMaximum(0), transformedEnvelope.getMaximum(1), dim1.width, dim1.height);
 
+		if (fTG.getServiceMaxLevel() != null) {
+			if (level > fTG.getServiceMaxLevel()) {
+				level = fTG.getServiceMaxLevel();
+			}
+		}
+		
+		if(maxLevel != null) {
+			if (level > maxLevel) {
+				level = maxLevel;
+			}
+		}
+
 		double centerx = transformedEnvelope.getMinimum(0)
 				+ (transformedEnvelope.getMaximum(0) - transformedEnvelope.getMinimum(0)) / 2.;
 		double centery = transformedEnvelope.getMinimum(1)
@@ -381,70 +446,92 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 				.round(((transformedEnvelope.getMaximum(1) - transformedEnvelope.getMinimum(1)) / resSet[level - 1]));
 
 		BufferedImage bi = null;
-		if(fTG.getPathGenerator() instanceof DynamicPathGenerator) {
-			DynamicPathGenerator dp = (DynamicPathGenerator)fTG.getPathGenerator();
+		if (fTG.getPathGenerator() instanceof DynamicPathGenerator) {
+			DynamicPathGenerator dp = (DynamicPathGenerator) fTG.getPathGenerator();
 			bi = dp.getMap(fTG, level, centerx, centery, width, height, pattern);
 		} else {
 			bi = fTG.getPathGenerator().getMap(fTG, level, centerx, centery, width, height);
 		}
 
 		Integer imageChoice = Integer.valueOf(0);
-        final ImageReadParam readP = new ImageReadParam();
-        final Hints newHints = hints.clone();
-        //Interpolation inter = new InterpolationNearest();
-        //newHints.put(JAI.KEY_INTERPOLATION, inter);
+		final ImageReadParam readP = new ImageReadParam();
+		final Hints newHints = hints.clone();
+		// Interpolation inter = new InterpolationNearest();
+		// newHints.put(JAI.KEY_INTERPOLATION, inter);
 
 		final ParameterBlock pbjRead = new ParameterBlock();
-        pbjRead.add(convertBufferedImageToImageInputStream(bi));
-        // pbjRead.add(wmsRequest ? ImageIO
-        // .createImageInputStream(((URL) source).openStream()) : ImageIO
-        // .createImageInputStream(source));
-        pbjRead.add(imageChoice);
-        pbjRead.add(Boolean.FALSE);
-        pbjRead.add(Boolean.FALSE);
-        pbjRead.add(Boolean.FALSE);
-        pbjRead.add(null);
-        pbjRead.add(null);
-        pbjRead.add(readP);
-        pbjRead.add(readerSPI.createReaderInstance());
-        final RenderedOp coverageRaster = JAI.create("ImageRead", pbjRead, newHints);
+		pbjRead.add(convertBufferedImageToImageInputStream(bi));
+		// pbjRead.add(wmsRequest ? ImageIO
+		// .createImageInputStream(((URL) source).openStream()) : ImageIO
+		// .createImageInputStream(source));
+		pbjRead.add(imageChoice);
+		pbjRead.add(Boolean.FALSE);
+		pbjRead.add(Boolean.FALSE);
+		pbjRead.add(Boolean.FALSE);
+		pbjRead.add(null);
+		pbjRead.add(null);
+		pbjRead.add(readP);
+		pbjRead.add(readerSPI.createReaderInstance());
+		final RenderedOp coverageRaster = JAI.create("ImageRead", pbjRead, newHints);
 
 		// GridCoverage2D 객체를 생성합니다.
-		//GridCoverage2D gridCoverage = coverageFactory.create("ImageCoverage", bi, requestedEnvelope1, sampleDimensions);
-		//raster2Model= geMapper.createTransform();
-		
-        GridEnvelope2D gridRange2 =
-                new GridEnvelope2D(
-                        new Rectangle(
-                                (int) width,
-                                (int) height)); 
-        final GridToEnvelopeMapper geMapper =
-                new GridToEnvelopeMapper(gridRange2, requestedEnvelope1);
+		// GridCoverage2D gridCoverage = coverageFactory.create("ImageCoverage", bi,
+		// requestedEnvelope1, sampleDimensions);
+		// raster2Model= geMapper.createTransform();
+
+		GridEnvelope2D gridRange2 = new GridEnvelope2D(new Rectangle((int) width, (int) height));
+		final GridToEnvelopeMapper geMapper = new GridToEnvelopeMapper(gridRange2, requestedEnvelope1);
 		geMapper.setPixelAnchor(PixelInCell.CELL_CORNER);
 		// 그리고 생성된 gridCoverage 객체를 사용합니다.
 		MathTransform rasterToModel = geMapper.createTransform();
-		
+
 //		final GridToEnvelopeMapper geMapper2 =
 //                new GridToEnvelopeMapper(gridRange2, transformedEnvelope);
 //		geMapper2.setPixelAnchor(PixelInCell.CELL_CORNER);
 		// 그리고 생성된 gridCoverage 객체를 사용합니다.
-       return createImageCoverage(coverageRaster, rasterToModel);
+		return createImageCoverage(coverageRaster, rasterToModel);
 	}
-	
-	public static ImageInputStream convertBufferedImageToImageInputStream(BufferedImage bufferedImage) throws IOException {
-        // BufferedImage의 픽셀 데이터를 바이트 배열로 저장
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
 
-        // 바이트 배열을 ByteArrayInputStream으로 변환
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+	public static ImageInputStream convertBufferedImageToImageInputStream(BufferedImage bufferedImage)
+			throws IOException {
+		// BufferedImage의 픽셀 데이터를 바이트 배열로 저장
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
 
-        // ByteArrayInputStream을 ImageInputStream으로 변환
-        ImageInputStream imageInputStream = ImageIO.createImageInputStream(byteArrayInputStream);
+		// 바이트 배열을 ByteArrayInputStream으로 변환
+		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 
-        return imageInputStream;
-    }
-	
+		// ByteArrayInputStream을 ImageInputStream으로 변환
+		ImageInputStream imageInputStream = ImageIO.createImageInputStream(byteArrayInputStream);
+
+		return imageInputStream;
+	}
+
+	public GridCoverage2D getCoverage(int level, ReferencedEnvelope env) {
+		double centerx = (env.getMaximum(0) + env.getMinimum(0)) / 2;
+		double centery = (env.getMaximum(1) + env.getMinimum(1)) / 2;
+
+		double res = getTG().getResolutions()[level - getTG().getfServceStartLevel() - 1];
+
+		int width = (int) ((env.getMaximum(0) - env.getMinimum(0)) / res);
+		int height = (int) ((env.getMaximum(1) - env.getMinimum(1)) / res);
+
+		int reqLevel = getLevel(env.getMinimum(0), env.getMinimum(1), env.getMaximum(0), env.getMaximum(1), width,
+				height);
+
+		BufferedImage bi = fTG.getPathGenerator().getMap(fTG, reqLevel, centerx, centery, width, height);
+
+//		try {
+//			FileOutputStream fos = new FileOutputStream("E:\\smartseoulmap_blob\\export\\xxx.png");
+//			ImageIO.write(bi, "png", fos);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+
+		ReferencedEnvelope refEnv = new ReferencedEnvelope(env.getMinimum(0), env.getMaximum(0), env.getMinimum(1),
+				env.getMaximum(1), env.getCoordinateReferenceSystem());
+		return (new GridCoverageFactory()).create(fTG.getName(), bi, refEnv);
+	}
 
 //	private GridCoverage2D loadTiles(GeneralEnvelope requestedEnvelope, Rectangle dim, GeneralParameterValue[] params,
 //			OverviewPolicy overviewPolicy) throws IOException {
@@ -645,10 +732,19 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		// System.out.println("minY : " + minY);
 		// System.out.println("maxX : " + maxX);
 		// System.out.println("maxY : " + maxY);
-		System.out.println("smallestResolutionDifference : " + smallestResolutionDifference);
-		System.out.println("selectResolutionDifference : " + resolutions[level]);
-		System.out.println("lvl : " + (level + 1));
+		// System.out.println("smallestResolutionDifference : " +
+		// smallestResolutionDifference);
+		// System.out.println("selectResolutionDifference : " + resolutions[level]);
+		// System.out.println("lvl : " + (level + 1));
 		return level + 1;
+	}
+
+	public TileGenerator getTG() {
+		return fTG;
+	}
+
+	public void setfTG(TileGenerator TG) {
+		this.fTG = TG;
 	}
 
 }

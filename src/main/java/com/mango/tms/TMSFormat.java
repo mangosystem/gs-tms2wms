@@ -73,7 +73,7 @@ public final class TMSFormat extends AbstractGridFormat implements Format {
 		HashMap<String, String> info = new HashMap<String, String>();
 		info.put("name", "TMS");
 		info.put("description", "TMS2WMS Service");
-		info.put("vendor", "jyajya");
+		info.put("vendor", "onSpatial inc");
 		info.put("docURL", "");
 		info.put("version", "1.0");
 		mInfo = info;

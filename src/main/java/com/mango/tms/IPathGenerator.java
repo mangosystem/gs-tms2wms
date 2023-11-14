@@ -1,6 +1,7 @@
 package com.mango.tms;
 
 import java.awt.image.BufferedImage;
+import java.util.Map;
 import java.util.Properties;
 
 public interface IPathGenerator {
@@ -12,6 +13,8 @@ public interface IPathGenerator {
 	String shortPath(Tile tile);
 
 	void init(Properties props);
+	
+	void init(Map<String, Object> props);
 	
 	BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY,
 			int reqWidth, int reqHeight);

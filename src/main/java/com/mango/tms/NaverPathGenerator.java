@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Map;
 import java.util.Properties;
 
 import org.geotools.geometry.GeneralEnvelope;
@@ -17,6 +18,14 @@ public class NaverPathGenerator implements IPathGenerator {
 		String value = props.getProperty("url.pattern");
 		if (value == null) {
 			throw new RuntimeException("url.pattern");
+		}
+		fURLPattern = value;
+	}
+	
+	public void init(Map<String, Object> props) {
+		String value = (String)props.get("url_pattern");
+		if (value == null) {
+			throw new RuntimeException("url_pattern");
 		}
 		fURLPattern = value;
 	}
