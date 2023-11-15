@@ -381,6 +381,22 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 
 			}
 		}
+		
+		exps = new ArrayList<>();
+		l = new LiteralExpressionImpl("min_level");
+		exps.add(l);
+		envFunc = ff.findFunction("env", exps);
+		String minLevelStr = envFunc.evaluate("min_level", String.class);
+		Integer minLevel = null;
+		if (minLevelStr == null || "".equals(minLevelStr)) {
+			minLevel = null;
+		} else {
+			try {
+				minLevel = Integer.parseInt(minLevelStr);
+			} catch (Exception e) {
+
+			}
+		}
 
 		if (fTG.isOutline()) {
 			System.out.println("PATTERN : " + pattern);
@@ -430,9 +446,21 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 			}
 		}
 		
+		if (fTG.getServiceMinLevel() != null) {
+			if (level < fTG.getServiceMinLevel()) {
+				level = fTG.getServiceMinLevel();
+			}
+		}
+		
 		if(maxLevel != null) {
 			if (level > maxLevel) {
 				level = maxLevel;
+			}
+		}
+		
+		if(minLevel != null) {
+			if (level < minLevel) {
+				level = minLevel;
 			}
 		}
 
