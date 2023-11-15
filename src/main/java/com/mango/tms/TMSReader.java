@@ -382,21 +382,21 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 			}
 		}
 		
-		exps = new ArrayList<>();
-		l = new LiteralExpressionImpl("min_level");
-		exps.add(l);
-		envFunc = ff.findFunction("env", exps);
-		String minLevelStr = envFunc.evaluate("min_level", String.class);
-		Integer minLevel = null;
-		if (minLevelStr == null || "".equals(minLevelStr)) {
-			minLevel = null;
-		} else {
-			try {
-				minLevel = Integer.parseInt(minLevelStr);
-			} catch (Exception e) {
-
-			}
-		}
+//		exps = new ArrayList<>();
+//		l = new LiteralExpressionImpl("min_level");
+//		exps.add(l);
+//		envFunc = ff.findFunction("env", exps);
+//		String minLevelStr = envFunc.evaluate("min_level", String.class);
+//		Integer minLevel = null;
+//		if (minLevelStr == null || "".equals(minLevelStr)) {
+//			minLevel = null;
+//		} else {
+//			try {
+//				minLevel = Integer.parseInt(minLevelStr);
+//			} catch (Exception e) {
+//
+//			}
+//		}
 
 		if (fTG.isOutline()) {
 			System.out.println("PATTERN : " + pattern);
@@ -458,11 +458,11 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 			}
 		}
 		
-		if(minLevel != null) {
-			if (level < minLevel) {
-				level = minLevel;
-			}
-		}
+//		if(minLevel != null) {
+//			if (level < minLevel) {
+//				level = minLevel;
+//			}
+//		}
 
 		double centerx = transformedEnvelope.getMinimum(0)
 				+ (transformedEnvelope.getMaximum(0) - transformedEnvelope.getMinimum(0)) / 2.;
