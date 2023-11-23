@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
@@ -28,14 +29,15 @@ public class DawlPathGenerator extends TMSPathGenerator {
 //		level = fTG.getResolutions().length - level;
 		double[] resSet = fTG.getResolutions();
 		int lidx = 0;
-		//for(double res : resSet) {
-		//	System.out.println(lidx + ":" +res);
-		//	lidx ++;
-		//}
+		// for(double res : resSet) {
+		// System.out.println(lidx + ":" +res);
+		// lidx ++;
+		// }
 		System.out.println("res level idx : " + level);
-		double res = resSet[level -1];
-		//System.out.println("level : " + level);
-		//System.out.println("res : " + res);
+
+		double res = resSet[level - 1];
+		// System.out.println("level : " + level);
+		// System.out.println("res : " + res);
 		double reqHalfRealWidth = reqWidth / 2 * res;
 		double reqHalfRealHeight = reqHeight / 2 * res;
 		double tileRealwidth = fTG.getTileWidth() * res;
@@ -141,14 +143,29 @@ public class DawlPathGenerator extends TMSPathGenerator {
 		int imageOffsetX = (int) ((fullEnv.getMinimum(0) - reqEnv.getMinimum(0)) / res);
 		int imageOffsetY = (int) ((reqEnv.getMaximum(1) - fullEnv.getMaximum(1)) / res);
 
+		// if(level == 1) {
+		System.out.println("dawl  tile size = > " + tiles.length + " " + tiles[0].length);
+		
+		int tileCnt = tiles.length * tiles[0].length;
+		if (tileCnt > 100) {
+			System.out.println("dawl cancel map = > " + tiles.length + " " + tiles[0].length);
+			return new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+		}
+		// }
+		System.out.println("dawl request map = > " + tiles.length + " " + tiles[0].length);
+
 		BufferedImage bi = new BufferedImage(reqWidth, reqHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
 		for (int y = 0; y < tiles.length; y++) {
 			for (int x = 0; x < tiles[y].length; x++) {
+				//System.out.println("tiles => " + tiles.length + ":" + tiles[y].length);
+				//System.out.println("prev draw => " + y + ":" + x);
 				BufferedImage tileImage = getTileImage(fTG, tiles[y][x]);
 				Rect r = tiles[y][x].getRect();
 				g.drawImage(tileImage, r.getX() + imageOffsetX, r.getY() + imageOffsetY, null);
+				//System.out.println("tiles => " + tiles.length + ":" + tiles[y].length);
+				//System.out.println("after draw => " + y + ":" + x);
 			}
 		}
 
@@ -177,6 +194,7 @@ public class DawlPathGenerator extends TMSPathGenerator {
 				}
 			}
 		}
+		g.dispose();
 
 		return bi;
 	}
@@ -184,7 +202,7 @@ public class DawlPathGenerator extends TMSPathGenerator {
 	public BufferedImage getTileImage(TileGenerator fTG, Tile tile) {
 		tile.setLevel(tile.getLevel() + (fTG.getfServceStartLevel() - 1));
 		String path = buildPath(tile);
-		//System.out.println(path);
+		// System.out.println(path);
 
 		if (!tile.isInclude()) {
 //			System.out.println("BLANK");
@@ -216,7 +234,7 @@ public class DawlPathGenerator extends TMSPathGenerator {
 
 		try {
 			{
-				System.out.println(path);
+				// System.out.println(path);
 				URL u = new URL(path);
 				HttpURLConnection conn;
 
@@ -232,10 +250,36 @@ public class DawlPathGenerator extends TMSPathGenerator {
 				conn.addRequestProperty("User-Agent",
 						"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36");
 				if (conn.getResponseCode() == 200) {
-					is = conn.getInputStream();
-					BufferedImage bi = ImageIO.read(is);
-					is.close();
-					conn.disconnect();
+					BufferedImage bi = null;
+					
+					System.out.println(path);
+					try {
+						is = conn.getInputStream();
+						bi = ImageIO.read(is);
+					} catch(Exception e) {
+						bi = fTG.getBlank();
+						e.printStackTrace();
+					} finally {
+						if(is != null) {
+							try {
+								is.close();
+							} catch(NullPointerException e) {
+								
+							} catch(Exception e) {
+								
+							}
+						}
+						if(conn != null) {
+							try {
+								conn.disconnect();
+							} catch(NullPointerException e) {
+								
+							} catch(Exception e) {
+								
+							}
+						}
+						
+					}
 
 					if (fTG.isTileCache()) {
 						if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")
@@ -253,13 +297,14 @@ public class DawlPathGenerator extends TMSPathGenerator {
 
 					return bi;
 				} else {
+					System.out.println("BLANK");
 					return fTG.getBlank();
 				}
 
 				// InputStream is = conn.getInputStream();
 			}
 		} catch (Exception e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 			return fTG.getBlank();
 		}
 	}
@@ -285,10 +330,10 @@ public class DawlPathGenerator extends TMSPathGenerator {
 		realPath = replaceVariables(realPath, "%MCOL%", mcol);
 		realPath = replaceVariables(realPath, "%ROW%", row);
 		realPath = replaceVariables(realPath, "%COL%", col);
-		System.out.println(realPath);
+		// System.out.println(realPath);
 		return realPath;
 	}
-	
+
 	public String shortPath(Tile tile) {
 		String realPath = "" + "/";
 

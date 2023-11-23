@@ -15,6 +15,7 @@ import org.geotools.geometry.GeneralEnvelope;
 public class DynamicPathGenerator extends PathGenerator {
 	private String pattern = null;
 	private String fDynamicURLPattern = null;
+
 	public void init(Properties props) {
 		super.init(props);
 		String value = props.getProperty("url.pattern.dynamic");
@@ -35,21 +36,22 @@ public class DynamicPathGenerator extends PathGenerator {
 			int reqHeight) {
 		return getMap(fTG, level, centerX, centerY, reqWidth, reqHeight, null);
 	}
-	
-	public String buildPath(Tile tile, String pattern) {
-		//int sidx = 0;
-		//try {
-		//	sidx = (int) (Math.random() * 4d) + tile.getTileGenerator().getfUrlServerStart();
-		//} catch (Exception e) {
 
-		//}
-		//String server = "" + sidx;
+	public String buildPath(Tile tile, String pattern) {
+		// int sidx = 0;
+		// try {
+		// sidx = (int) (Math.random() * 4d) +
+		// tile.getTileGenerator().getfUrlServerStart();
+		// } catch (Exception e) {
+
+		// }
+		// String server = "" + sidx;
 		String level = Integer.toString(tile.getLevel());
 		String row = Integer.toString(tile.getGridY());
 		String col = Integer.toString(tile.getGridX());
 
 		String realPath = null;
-		if(pattern != null) {
+		if (pattern != null) {
 			realPath = fDynamicURLPattern;
 		} else {
 			realPath = fURLPattern;
@@ -59,9 +61,9 @@ public class DynamicPathGenerator extends PathGenerator {
 		realPath = replaceVariables(realPath, "%LEVEL%", level);
 		realPath = replaceVariables(realPath, "%ROW%", row);
 		realPath = replaceVariables(realPath, "%COL%", col);
-		//if(is) {
-		//	System.out.println(realPath);
-		//}
+		// if(is) {
+		// System.out.println(realPath);
+		// }
 		return realPath;
 	}
 
@@ -176,6 +178,16 @@ public class DynamicPathGenerator extends PathGenerator {
 		int imageOffsetX = (int) ((fullEnv.getMinimum(0) - reqEnv.getMinimum(0)) / res);
 		int imageOffsetY = (int) ((reqEnv.getMaximum(1) - fullEnv.getMaximum(1)) / res);
 
+		System.out.println("dynamic  tile size = > " + tiles.length + " " + tiles[0].length);
+		
+		int tileCnt = tiles.length * tiles[0].length;
+		if (tileCnt > 100) {
+			System.out.println("dynamic cancel map = > " + tiles.length + " " + tiles[0].length);
+			return new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+		}
+		// }
+		System.out.println("dynamic request map = > " + tiles.length + " " + tiles[0].length);
+
 		BufferedImage bi = new BufferedImage(reqWidth, reqHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
@@ -213,7 +225,7 @@ public class DynamicPathGenerator extends PathGenerator {
 				}
 			}
 		}
-
+		g.dispose();
 		return bi;
 	}
 

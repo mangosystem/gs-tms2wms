@@ -133,6 +133,7 @@ public class PathGenerator implements IPathGenerator {
 		}
 
 		try {
+			System.out.println(path);
 			{
 				URL u = new URL(path);
 				String protocol = u.getProtocol().toLowerCase();
@@ -146,10 +147,34 @@ public class PathGenerator implements IPathGenerator {
 					conn.addRequestProperty("User-Agent",
 							"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36");
 					if (conn.getResponseCode() == 200) {
-						is = conn.getInputStream();
-						bi = ImageIO.read(is);
-						is.close();
-						conn.disconnect();
+						System.out.println(path);
+						try {
+							is = conn.getInputStream();
+							bi = ImageIO.read(is);
+						} catch(Exception e) {
+							bi = fTG.getBlank();
+							e.printStackTrace();
+						} finally {
+							if(is != null) {
+								try {
+									is.close();
+								} catch(NullPointerException e) {
+									
+								} catch(Exception e) {
+									
+								}
+							}
+							if(conn != null) {
+								try {
+									conn.disconnect();
+								} catch(NullPointerException e) {
+									
+								} catch(Exception e) {
+									
+								}
+							}
+							
+						}
 
 						if (fTG.isTileCache()) {
 							if (!(cacheFilePath.toLowerCase().endsWith("png") || cacheFilePath.toLowerCase().endsWith("jpg")

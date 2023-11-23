@@ -128,19 +128,23 @@ public class DefaultPathGenerator extends PathGenerator {
 		int imageOffsetX = (int) ((fullEnv.getMinimum(0) - reqEnv.getMinimum(0)) / res);
 		int imageOffsetY = (int) ((reqEnv.getMaximum(1) - fullEnv.getMaximum(1)) / res);
 
+
+		System.out.println("default  tile size = > " + tiles.length + " " + tiles[0].length);
+		
+		int tileCnt = tiles.length * tiles[0].length;
+		if (tileCnt > 100) {
+			System.out.println("default cancel map = > " + tiles.length + " " + tiles[0].length);
+			return new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+		}
+		// }
+		System.out.println("default request map = > " + tiles.length + " " + tiles[0].length);
+		
 		BufferedImage bi = new BufferedImage(reqWidth, reqHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = (Graphics2D) bi.getGraphics();
 
 		for (int y = 0; y < tiles.length; y++) {
 			for (int x = 0; x < tiles[y].length; x++) {
 				BufferedImage tileImage = getTileImage(fTG, tiles[y][x]);
-//				try {
-//					FileOutputStream fos = new FileOutputStream("E:\\smartseoulmap_blob\\export\\" + y + "_" + x + ".png");
-//					ImageIO.write(bi, "png", fos);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-
 				Rect r = tiles[y][x].getRect();
 				g.drawImage(tileImage, r.getX() + imageOffsetX, r.getY() + imageOffsetY, null);
 			}
@@ -171,7 +175,7 @@ public class DefaultPathGenerator extends PathGenerator {
 				}
 			}
 		}
-
+		g.dispose();
 		return bi;
 	}
 

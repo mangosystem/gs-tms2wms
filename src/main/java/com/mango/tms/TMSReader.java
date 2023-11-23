@@ -497,7 +497,7 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		pbjRead.add(readerSPI.createReaderInstance());
 		final RenderedOp coverageRaster = JAI.create("ImageRead", pbjRead, newHints);
 
-		GridEnvelope2D gridRange2 = new GridEnvelope2D(new Rectangle((int) width, (int) height));
+		GridEnvelope2D gridRange2 = new GridEnvelope2D(new Rectangle(bi.getWidth(), bi.getHeight()));
 		final GridToEnvelopeMapper geMapper = new GridToEnvelopeMapper(gridRange2, requestedEnvelope1);
 		geMapper.setPixelAnchor(PixelInCell.CELL_CORNER);
 		MathTransform rasterToModel = geMapper.createTransform();
