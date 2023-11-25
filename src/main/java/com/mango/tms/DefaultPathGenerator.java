@@ -129,15 +129,15 @@ public class DefaultPathGenerator extends PathGenerator {
 		int imageOffsetY = (int) ((reqEnv.getMaximum(1) - fullEnv.getMaximum(1)) / res);
 
 
-		System.out.println("default  tile size = > " + tiles.length + " " + tiles[0].length);
+		System.out.println("default  tile size = > " + (tiles.length + " " + tiles[0].length));
 		
 		int tileCnt = tiles.length * tiles[0].length;
-		if (tileCnt > 100) {
-			System.out.println("default cancel map = > " + tiles.length + " " + tiles[0].length);
+		if (tileCnt > fTG.getfMaxTileCount()) {
+			System.out.println("default cancel map = > " + (tiles.length + " " + tiles[0].length));
 			return new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
 		}
 		// }
-		System.out.println("default request map = > " + tiles.length + " " + tiles[0].length);
+		System.out.println("default request map = > " + (tiles.length + " " + tiles[0].length));
 		
 		BufferedImage bi = new BufferedImage(reqWidth, reqHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = (Graphics2D) bi.getGraphics();

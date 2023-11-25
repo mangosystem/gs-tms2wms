@@ -144,15 +144,15 @@ public class DawlPathGenerator extends TMSPathGenerator {
 		int imageOffsetY = (int) ((reqEnv.getMaximum(1) - fullEnv.getMaximum(1)) / res);
 
 		// if(level == 1) {
-		System.out.println("dawl  tile size = > " + tiles.length + " " + tiles[0].length);
+		System.out.println("dawl  tile size = > " + (tiles.length + " " + tiles[0].length));
 		
 		int tileCnt = tiles.length * tiles[0].length;
-		if (tileCnt > 100) {
-			System.out.println("dawl cancel map = > " + tiles.length + " " + tiles[0].length);
+		if (tileCnt > fTG.getfMaxTileCount()) {
+			System.out.println("dawl cancel map = > " + (tiles.length + " " + tiles[0].length));
 			return new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
 		}
 		// }
-		System.out.println("dawl request map = > " + tiles.length + " " + tiles[0].length);
+		System.out.println("dawl request map = > " + (tiles.length + " " + tiles[0].length));
 
 		BufferedImage bi = new BufferedImage(reqWidth, reqHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = (Graphics2D) bi.getGraphics();

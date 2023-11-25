@@ -41,6 +41,7 @@ public class TileGenerator {
 	private Integer fServiceMinLevel;
 	private Integer fServiceMaxLevel;
 	private Integer fServceStartLevel;
+	private Integer fMaxTileCount;
 	private String fPathYOrder;
 	private boolean fOutline;
 	private boolean fTileCache;
@@ -213,6 +214,12 @@ public class TileGenerator {
 			fUrlServerStart = Integer.parseInt(props.getProperty("url.server.start", "0"));
 		} catch (Exception e) {
 			fUrlServerStart = 0;
+		}
+		
+		try {
+			fMaxTileCount = Integer.parseInt(props.getProperty("max.tile.count", "50"));
+		} catch (Exception e) {
+			fMaxTileCount = 50;
 		}
 
 		fImageFormat = props.getProperty("image.format", "png");
@@ -402,6 +409,12 @@ public class TileGenerator {
 		} catch (Exception e) {
 			fServceStartLevel = 0;
 		}
+		
+		try {
+			fMaxTileCount = Integer.parseInt((String) map.get("max_tile_count"));
+		} catch (Exception e) {
+			fMaxTileCount = 50;
+		}
 
 		fImageFormat = (String) map.get("image_format");
 	}
@@ -567,6 +580,15 @@ public class TileGenerator {
 	public int getfUrlServerStart() {
 		return fUrlServerStart;
 	}
+	
+	public void setfMaxTileCount(int tilecount) {
+		fMaxTileCount = tilecount;
+	}
+	
+	public int getfMaxTileCount() {
+		return fMaxTileCount;
+	}
+
 
 	public void setfUrlServerCnt(int fUrlServerCnt) {
 		this.fUrlServerCnt = fUrlServerCnt;

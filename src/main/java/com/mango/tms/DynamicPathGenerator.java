@@ -178,15 +178,15 @@ public class DynamicPathGenerator extends PathGenerator {
 		int imageOffsetX = (int) ((fullEnv.getMinimum(0) - reqEnv.getMinimum(0)) / res);
 		int imageOffsetY = (int) ((reqEnv.getMaximum(1) - fullEnv.getMaximum(1)) / res);
 
-		System.out.println("dynamic  tile size = > " + tiles.length + " " + tiles[0].length);
+		System.out.println("dynamic  tile size = > " + (tiles.length + " " + tiles[0].length));
 		
 		int tileCnt = tiles.length * tiles[0].length;
-		if (tileCnt > 100) {
-			System.out.println("dynamic cancel map = > " + tiles.length + " " + tiles[0].length);
+		if (tileCnt > fTG.getfMaxTileCount()) {
+			System.out.println("dynamic cancel map = > " + (tiles.length + " " + tiles[0].length));
 			return new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
 		}
 		// }
-		System.out.println("dynamic request map = > " + tiles.length + " " + tiles[0].length);
+		System.out.println("dynamic request map = > " + (tiles.length + " " + tiles[0].length));
 
 		BufferedImage bi = new BufferedImage(reqWidth, reqHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = (Graphics2D) bi.getGraphics();
