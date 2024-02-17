@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.Properties;
 
+import org.locationtech.jts.geom.Geometry;
+
 public interface IPathGenerator {
 
 	String buildPath(Tile tile);
@@ -18,4 +20,8 @@ public interface IPathGenerator {
 	
 	BufferedImage getMap(TileGenerator fTG, int level, double centerX, double centerY,
 			int reqWidth, int reqHeight);
+	
+	public Tile[][] getTileSet(TileGenerator fTG, int level, Geometry roi) ;
+	public Tile[][] getTileSet(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
+			int reqHeight);
 }

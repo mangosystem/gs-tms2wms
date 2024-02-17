@@ -1,5 +1,7 @@
 package com.mango.tms;
 
+import org.geotools.geometry.GeneralEnvelope;
+
 public class Tile {
 	private Rect fRect;
 	private int fGridX = 0;
@@ -8,6 +10,7 @@ public class Tile {
 	private int fNumLevel = 0;
 	private boolean isInclude;
 	private TileGenerator tileGenerator;
+	private GeneralEnvelope env;
 
 	public Tile(Rect rect, int level, int numLevel, boolean isInclude) {
 		fNumLevel = numLevel;
@@ -90,4 +93,11 @@ public class Tile {
 		this.tileGenerator = tileGenerator;
 	}
 
+	public GeneralEnvelope getEnv() {
+		return env;
+	}
+
+	public void setEnv(GeneralEnvelope env) {
+		this.env = env;
+	}
 }

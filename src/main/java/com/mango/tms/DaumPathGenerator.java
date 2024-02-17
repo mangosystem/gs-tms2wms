@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.geotools.geometry.GeneralEnvelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
 public class DaumPathGenerator implements IPathGenerator {
 
@@ -51,7 +53,7 @@ public class DaumPathGenerator implements IPathGenerator {
 
 		}
 		String server = "" + sidx;
-		String level = "L" + ((Integer.toString(tile.getLevel()) + "").length() <= 1
+		String level = "" + ((Integer.toString(tile.getLevel()) + "").length() <= 1
 				? "" + (Integer.toString(tile.getLevel()) + "")
 				: (Integer.toString(tile.getLevel()) + ""));
 		String row = Integer.toString(tile.getGridY());
@@ -133,6 +135,7 @@ public class DaumPathGenerator implements IPathGenerator {
 				boolean include = fTG.getBounds().intersects(env, true);
 				tiles[y][x] = new Tile(rect, level, resSet.length, include);
 				tiles[y][x].setGridXY(ax, ay);
+				tiles[y][x].setEnv(env);
 				if (!fTG.getBounds().intersects(env, true)) {
 					tiles[y][x].setInclude(true);
 				}
@@ -188,6 +191,136 @@ public class DaumPathGenerator implements IPathGenerator {
 		}
 
 		return bi;
+	}
+	
+	public Tile[][] getTileSet(TileGenerator fTG, int level, double centerX, double centerY, int reqWidth,
+			int reqHeight) {
+		double[] resSet = fTG.getResolutions();
+		double res = resSet[level - 1];
+		double reqHalfRealWidth = reqWidth / 2 * res;
+		double reqHalfRealHeight = reqHeight / 2 * res;
+		double tileRealwidth = fTG.getTileWidth() * res;
+		double tileRealheight = fTG.getTileHeight() * res;
+
+		int maxXTileNum = -1;
+		int maxYTileNum = -1;
+
+		maxXTileNum = (int) Math.floor((fTG.getBounds().getMaximum(0) - fTG.getOriginX()) / tileRealwidth);
+		maxYTileNum = (int) Math.floor((fTG.getBounds().getMaximum(1) - fTG.getOriginY()) / tileRealheight);
+
+		double[] reqMinDp = new double[] { centerX - reqHalfRealWidth, centerY - reqHalfRealHeight };
+		double[] reqMaxDp = new double[] { centerX + reqHalfRealWidth, centerY + reqHalfRealHeight };
+		GeneralEnvelope reqEnv = new GeneralEnvelope(reqMinDp, reqMaxDp);
+		reqEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
+
+		int startTileX = (int) Math.floor((reqEnv.getMinimum(0) - fTG.getOriginX()) / (tileRealwidth));
+		int endTileX = (int) Math.ceil((reqEnv.getMaximum(0) - fTG.getOriginX()) / (tileRealwidth)) - 1;
+
+		int startTileY = (int) Math.floor((reqEnv.getMinimum(1) - fTG.getOriginY()) / (tileRealheight));
+		int endTileY = (int) Math.ceil((reqEnv.getMaximum(1) - fTG.getOriginY()) / (tileRealheight)) - 1;
+
+		int tileColCount = endTileX - startTileX + 1;
+		int tileRowCount = endTileY - startTileY + 1;
+
+		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
+		GeneralEnvelope fullEnv = null;
+		for (int y = 0; y < tiles.length; y++) {
+			int ay = endTileY - y;
+			double minY = fTG.getOriginY() + ay * tileRealheight;
+			double maxY = minY + tileRealheight;
+			int offsetY = (y) * fTG.getTileHeight();
+			for (int x = 0; x < tiles[y].length; x++) {
+				int ax = startTileX + x;
+				double minX = fTG.getOriginX() + ax * tileRealwidth;
+				double maxX = minX + tileRealwidth;
+				int offsetX = x * fTG.getTileWidth();
+				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG.getTileHeight());
+				GeneralEnvelope env = new GeneralEnvelope(new double[] { minX, minY }, new double[] { maxX, maxY });
+				env.setCoordinateReferenceSystem(fTG.getTileCRS());
+
+				if (fullEnv == null) {
+					fullEnv = new GeneralEnvelope(env);
+				} else {
+					fullEnv.add(env);
+				}
+
+				boolean include = fTG.getBounds().intersects(env, true);
+				tiles[y][x] = new Tile(rect, level, resSet.length, include);
+				tiles[y][x].setGridXY(ax, ay);
+				tiles[y][x].setEnv(env);
+				if (!fTG.getBounds().intersects(env, true)) {
+					tiles[y][x].setInclude(true);
+				}
+
+//				if(maxXTileNum < ax || maxYTileNum < ay || ax < 0 || ay < 0) {
+//					tiles[y][x].setInclude(false);
+//				}
+			}
+		}
+		
+		return tiles;
+	}
+	
+	public Tile[][] getTileSet(TileGenerator fTG, int level, Geometry roi) {
+		double[] resSet = fTG.getResolutions();
+		double res = resSet[level - 1];
+		double reqHalfRealWidth = roi.getEnvelopeInternal().getWidth() / 2.;
+		double reqHalfRealHeight = roi.getEnvelopeInternal().getHeight() / 2.;
+		double tileRealwidth = fTG.getTileWidth() * res;
+		double tileRealheight = fTG.getTileHeight() * res;
+
+		double[] reqMinDp = new double[] { roi.getEnvelopeInternal().centre().x - reqHalfRealWidth, roi.getEnvelopeInternal().centre().y - reqHalfRealHeight };
+		double[] reqMaxDp = new double[] { roi.getEnvelopeInternal().centre().x + reqHalfRealWidth, roi.getEnvelopeInternal().centre().y + reqHalfRealHeight };
+
+		GeneralEnvelope reqEnv = new GeneralEnvelope(reqMinDp, reqMaxDp);
+		reqEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
+
+		int startTileX = (int) Math.floor((reqEnv.getMinimum(0) - fTG.getOriginX()) / (tileRealwidth));
+		int endTileX = (int) Math.ceil((reqEnv.getMaximum(0) - fTG.getOriginX()) / (tileRealwidth)) - 1;
+
+		int startTileY = (int) Math.floor((reqEnv.getMinimum(1) - fTG.getOriginY()) / (tileRealheight));
+		int endTileY = (int) Math.ceil((reqEnv.getMaximum(1) - fTG.getOriginY()) / (tileRealheight)) - 1;
+
+		int tileColCount = endTileX - startTileX + 1;
+		int tileRowCount = endTileY - startTileY + 1;
+
+		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
+		GeneralEnvelope fullEnv = null;
+		for (int y = 0; y < tiles.length; y++) {
+			int ay = endTileY - y;
+			double minY = fTG.getOriginY() + ay * tileRealheight;
+			double maxY = minY + tileRealheight;
+			int offsetY = (y) * fTG.getTileHeight();
+			for (int x = 0; x < tiles[y].length; x++) {
+				int ax = startTileX + x;
+				double minX = fTG.getOriginX() + ax * tileRealwidth;
+				double maxX = minX + tileRealwidth;
+				int offsetX = x * fTG.getTileWidth();
+				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG.getTileHeight());
+				GeneralEnvelope env = new GeneralEnvelope(new double[] { minX, minY }, new double[] { maxX, maxY });
+				env.setCoordinateReferenceSystem(fTG.getTileCRS());
+
+				if (fullEnv == null) {
+					fullEnv = new GeneralEnvelope(env);
+				} else {
+					fullEnv.add(env);
+				}
+
+				boolean include = fTG.getBounds().intersects(env, true);
+				tiles[y][x] = new Tile(rect, level, resSet.length, include);
+				tiles[y][x].setGridXY(ax, ay);
+				tiles[y][x].setEnv(env);
+				if (!fTG.getBounds().intersects(env, true)) {
+					tiles[y][x].setInclude(true);
+				}
+
+//				if(maxXTileNum < ax || maxYTileNum < ay || ax < 0 || ay < 0) {
+//					tiles[y][x].setInclude(false);
+//				}
+			}
+		}
+		
+		return tiles;
 	}
 
 }

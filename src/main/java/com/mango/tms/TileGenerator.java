@@ -2,6 +2,7 @@ package com.mango.tms;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URI;
@@ -14,6 +15,11 @@ import javax.imageio.ImageIO;
 
 import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
+import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public class TileGenerator {
@@ -41,7 +47,6 @@ public class TileGenerator {
 	private Integer fServiceMinLevel;
 	private Integer fServiceMaxLevel;
 	private Integer fServceStartLevel;
-	private Integer fMaxTileCount;
 	private String fPathYOrder;
 	private boolean fOutline;
 	private boolean fTileCache;
@@ -214,12 +219,6 @@ public class TileGenerator {
 			fUrlServerStart = Integer.parseInt(props.getProperty("url.server.start", "0"));
 		} catch (Exception e) {
 			fUrlServerStart = 0;
-		}
-		
-		try {
-			fMaxTileCount = Integer.parseInt(props.getProperty("max.tile.count", "50"));
-		} catch (Exception e) {
-			fMaxTileCount = 50;
 		}
 
 		fImageFormat = props.getProperty("image.format", "png");
@@ -409,12 +408,6 @@ public class TileGenerator {
 		} catch (Exception e) {
 			fServceStartLevel = 0;
 		}
-		
-		try {
-			fMaxTileCount = Integer.parseInt((String) map.get("max_tile_count"));
-		} catch (Exception e) {
-			fMaxTileCount = 50;
-		}
 
 		fImageFormat = (String) map.get("image_format");
 	}
@@ -483,7 +476,9 @@ public class TileGenerator {
 						ImageIO.write(bi, path.substring(path.lastIndexOf(".") + 1), f);
 					}
 				} catch (IIOException iie) {
-
+					iie.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 				return bi;
 			}
@@ -507,6 +502,17 @@ public class TileGenerator {
 
 	public GeneralEnvelope getBounds() {
 		return fBounds;
+	}
+
+	public Polygon getPolygon(final GeometryFactory gf)
+			throws IllegalStateException, MismatchedDimensionException {
+		final Rectangle2D rect = fBounds.toRectangle2D();
+		final Coordinate[] coord = new Coordinate[] { new Coordinate(rect.getMinX(), rect.getMinY()),
+				new Coordinate(rect.getMinX(), rect.getMaxY()), new Coordinate(rect.getMaxX(), rect.getMaxY()),
+				new Coordinate(rect.getMaxX(), rect.getMinY()), new Coordinate(rect.getMinX(), rect.getMinY()) };
+		final LinearRing ring = gf.createLinearRing(coord);
+		final Polygon modelSpaceROI = new Polygon(ring, null, gf);
+		return modelSpaceROI;
 	}
 
 	public IPathGenerator getPathGenerator() {
@@ -580,15 +586,6 @@ public class TileGenerator {
 	public int getfUrlServerStart() {
 		return fUrlServerStart;
 	}
-	
-	public void setfMaxTileCount(int tilecount) {
-		fMaxTileCount = tilecount;
-	}
-	
-	public int getfMaxTileCount() {
-		return fMaxTileCount;
-	}
-
 
 	public void setfUrlServerCnt(int fUrlServerCnt) {
 		this.fUrlServerCnt = fUrlServerCnt;

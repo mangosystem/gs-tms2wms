@@ -381,22 +381,6 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 
 			}
 		}
-		
-//		exps = new ArrayList<>();
-//		l = new LiteralExpressionImpl("min_level");
-//		exps.add(l);
-//		envFunc = ff.findFunction("env", exps);
-//		String minLevelStr = envFunc.evaluate("min_level", String.class);
-//		Integer minLevel = null;
-//		if (minLevelStr == null || "".equals(minLevelStr)) {
-//			minLevel = null;
-//		} else {
-//			try {
-//				minLevel = Integer.parseInt(minLevelStr);
-//			} catch (Exception e) {
-//
-//			}
-//		}
 
 		if (fTG.isOutline()) {
 			System.out.println("PATTERN : " + pattern);
@@ -446,23 +430,11 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 			}
 		}
 		
-		if (fTG.getServiceMinLevel() != null) {
-			if (level < fTG.getServiceMinLevel()) {
-				level = fTG.getServiceMinLevel();
-			}
-		}
-		
 		if(maxLevel != null) {
 			if (level > maxLevel) {
 				level = maxLevel;
 			}
 		}
-		
-//		if(minLevel != null) {
-//			if (level < minLevel) {
-//				level = minLevel;
-//			}
-//		}
 
 		double centerx = transformedEnvelope.getMinimum(0)
 				+ (transformedEnvelope.getMaximum(0) - transformedEnvelope.getMinimum(0)) / 2.;
@@ -484,9 +456,14 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		Integer imageChoice = Integer.valueOf(0);
 		final ImageReadParam readP = new ImageReadParam();
 		final Hints newHints = hints.clone();
+		// Interpolation inter = new InterpolationNearest();
+		// newHints.put(JAI.KEY_INTERPOLATION, inter);
 
 		final ParameterBlock pbjRead = new ParameterBlock();
 		pbjRead.add(convertBufferedImageToImageInputStream(bi));
+		// pbjRead.add(wmsRequest ? ImageIO
+		// .createImageInputStream(((URL) source).openStream()) : ImageIO
+		// .createImageInputStream(source));
 		pbjRead.add(imageChoice);
 		pbjRead.add(Boolean.FALSE);
 		pbjRead.add(Boolean.FALSE);
@@ -497,11 +474,21 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 		pbjRead.add(readerSPI.createReaderInstance());
 		final RenderedOp coverageRaster = JAI.create("ImageRead", pbjRead, newHints);
 
-		GridEnvelope2D gridRange2 = new GridEnvelope2D(new Rectangle(bi.getWidth(), bi.getHeight()));
+		// GridCoverage2D 객체를 생성합니다.
+		// GridCoverage2D gridCoverage = coverageFactory.create("ImageCoverage", bi,
+		// requestedEnvelope1, sampleDimensions);
+		// raster2Model= geMapper.createTransform();
+
+		GridEnvelope2D gridRange2 = new GridEnvelope2D(new Rectangle((int) width, (int) height));
 		final GridToEnvelopeMapper geMapper = new GridToEnvelopeMapper(gridRange2, requestedEnvelope1);
 		geMapper.setPixelAnchor(PixelInCell.CELL_CORNER);
+		// 그리고 생성된 gridCoverage 객체를 사용합니다.
 		MathTransform rasterToModel = geMapper.createTransform();
 
+//		final GridToEnvelopeMapper geMapper2 =
+//                new GridToEnvelopeMapper(gridRange2, transformedEnvelope);
+//		geMapper2.setPixelAnchor(PixelInCell.CELL_CORNER);
+		// 그리고 생성된 gridCoverage 객체를 사용합니다.
 		return createImageCoverage(coverageRaster, rasterToModel);
 	}
 
