@@ -5,7 +5,8 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.Properties;
 
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.GeneralBounds;
+
 
 public class ArcPathGenerator extends PathGenerator {
 
@@ -62,7 +63,8 @@ public class ArcPathGenerator extends PathGenerator {
 
 		double[] mindp = new double[] { centerX - halfW, centerY - halfH };
 		double[] maxdp = new double[] { centerX + halfW, centerY + halfH };
-		GeneralEnvelope curEnv = new GeneralEnvelope(mindp, maxdp);
+		GeneralBounds curEnv = new GeneralBounds(mindp, maxdp);
+		//GeneralEnvelope curEnv = new GeneralEnvelope(mindp, maxdp);
 		curEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
 		
 		int startTileX = (int) Math.floor(((curEnv.getMinimum(0) - fTG
@@ -79,7 +81,7 @@ public class ArcPathGenerator extends PathGenerator {
 		int tileRowCount = endTileY - startTileY + 1;
 		
 		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
-		GeneralEnvelope fullEnv = null;
+		GeneralBounds fullEnv = null;
 		for (int y = 0; y < tiles.length; y++) {
 			
 			int ay = startTileY + y;
@@ -96,12 +98,12 @@ public class ArcPathGenerator extends PathGenerator {
 				
 				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(),
 						fTG.getTileHeight());
-				GeneralEnvelope env = new GeneralEnvelope(new double[] { minX,
+				GeneralBounds env = new GeneralBounds(new double[] { minX,
 						minY }, new double[] { maxX, maxY });
 				env.setCoordinateReferenceSystem(fTG.getTileCRS());
 				
 				if (fullEnv == null) {
-					fullEnv = new GeneralEnvelope(env);
+					fullEnv = new GeneralBounds(env);
 				} else {
 					fullEnv.add(env);
 				}

@@ -47,6 +47,17 @@ import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.RenderedOp;
 
+import org.geotools.api.coverage.grid.Format;
+import org.geotools.api.coverage.grid.GridCoverageReader;
+import org.geotools.api.data.DataSourceException;
+import org.geotools.api.filter.expression.Expression;
+import org.geotools.api.filter.expression.Function;
+import org.geotools.api.filter.expression.Literal;
+import org.geotools.api.parameter.GeneralParameterValue;
+import org.geotools.api.parameter.ParameterValue;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.datum.PixelInCell;
+import org.geotools.api.referencing.operation.MathTransform;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
@@ -54,26 +65,14 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
-import org.geotools.data.DataSourceException;
 import org.geotools.filter.FunctionFinder;
 import org.geotools.filter.LiteralExpressionImpl;
 import org.geotools.gce.imagemosaic.ImageMosaicReader;
-import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.builder.GridToEnvelopeMapper;
 import org.geotools.util.factory.Hints;
-import org.opengis.coverage.grid.Format;
-import org.opengis.coverage.grid.GridCoverageReader;
-import org.opengis.filter.expression.Expression;
-import org.opengis.filter.expression.Function;
-import org.opengis.filter.expression.Literal;
-import org.opengis.geometry.Envelope;
-import org.opengis.parameter.GeneralParameterValue;
-import org.opengis.parameter.ParameterValue;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.datum.PixelInCell;
-import org.opengis.referencing.operation.MathTransform;
+import org.locationtech.jts.geom.Envelope;
 
 import it.geosolutions.jaiext.BufferedImageAdapter;
 
@@ -279,7 +278,9 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 				final String name = param.getDescriptor().getName().getCode();
 				if (name.equals(AbstractGridFormat.READ_GRIDGEOMETRY2D.getName().toString())) {
 					final GridGeometry2D gg = (GridGeometry2D) param.getValue();
-					requestedEnvelope1 = new ReferencedEnvelope((Envelope) gg.getEnvelope2D());
+					//requestedEnvelope1 = new ReferencedEnvelope((Envelope) gg.getEnvelope2D());
+					
+					requestedEnvelope1 = new ReferencedEnvelope(gg.getEnvelope2D());
 					dim1 = gg.getGridRange2D().getBounds();
 					continue;
 				}
@@ -402,7 +403,7 @@ public final class TMSReader extends AbstractGridCoverage2DReader implements Gri
 				final String name = param.getDescriptor().getName().getCode();
 				if (name.equals(AbstractGridFormat.READ_GRIDGEOMETRY2D.getName().toString())) {
 					final GridGeometry2D gg = (GridGeometry2D) param.getValue();
-					requestedEnvelope1 = new ReferencedEnvelope((Envelope) gg.getEnvelope2D());
+					requestedEnvelope1 = new ReferencedEnvelope(gg.getEnvelope2D());
 					dim1 = gg.getGridRange2D().getBounds();
 					continue;
 				}

@@ -7,7 +7,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.Properties;
 
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.GeneralBounds;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 
@@ -115,7 +115,7 @@ public class NaverPathGenerator implements IPathGenerator {
 
 		double[] mindp = new double[]{centerX - halfW,centerY - halfH};
 		double[] maxdp = new double[]{centerX + halfW, centerY + halfH};
-		GeneralEnvelope curEnv = new GeneralEnvelope(mindp, maxdp);
+		GeneralBounds curEnv = new GeneralBounds(mindp, maxdp);
 		curEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
 		
 		int startTileX = (int) Math
@@ -132,7 +132,7 @@ public class NaverPathGenerator implements IPathGenerator {
 		int tileRowCount = endTileY - startTileY + 1;
 
 		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
-		GeneralEnvelope fullEnv = null;
+		GeneralBounds fullEnv = null;
 		for (int y = 0; y < tiles.length; y++) {
 			int ay = startTileY + y;
 			double minY = fTG.getOriginY() + ay * height;
@@ -145,11 +145,11 @@ public class NaverPathGenerator implements IPathGenerator {
 				int offsetX = x * fTG.getTileWidth();
 				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG
 						.getTileHeight());
-				GeneralEnvelope env = new GeneralEnvelope(new double[]{minX, minY}, new double[]{maxX, maxY});
+				GeneralBounds env = new GeneralBounds(new double[]{minX, minY}, new double[]{maxX, maxY});
 				env.setCoordinateReferenceSystem(fTG.getTileCRS());
 				
 				if (fullEnv == null) {
-					fullEnv = new GeneralEnvelope(env);
+					fullEnv = new GeneralBounds(env);
 				} else {
 					fullEnv.add(env);
 				}
@@ -212,7 +212,7 @@ public class NaverPathGenerator implements IPathGenerator {
 		double[] reqMinDp = new double[] { centerX - reqHalfRealWidth, centerY - reqHalfRealHeight };
 		double[] reqMaxDp = new double[] { centerX + reqHalfRealWidth, centerY + reqHalfRealHeight };
 
-		GeneralEnvelope reqEnv = new GeneralEnvelope(reqMinDp, reqMaxDp);
+		GeneralBounds reqEnv = new GeneralBounds(reqMinDp, reqMaxDp);
 		reqEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
 //		System.out.println("x0:" + (new BigDecimal(reqEnv.getMinimum(0)).toString()));
 //		System.out.println("y0:" + (new BigDecimal(reqEnv.getMinimum(1)).toString()));
@@ -241,7 +241,7 @@ public class NaverPathGenerator implements IPathGenerator {
 		int tileRowCount = endTileY - startTileY + 1;
 
 		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
-		GeneralEnvelope fullEnv = null;
+		GeneralBounds fullEnv = null;
 		for (int y = 0; y < tiles.length; y++) {
 			int ay = -1;
 			ay = startTileY + y;
@@ -265,11 +265,11 @@ public class NaverPathGenerator implements IPathGenerator {
 				double maxX = minX + tileRealwidth;
 				int offsetX = x * fTG.getTileWidth();
 				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG.getTileHeight());
-				GeneralEnvelope env = new GeneralEnvelope(new double[] { minX, minY }, new double[] { maxX, maxY });
+				GeneralBounds env = new GeneralBounds(new double[] { minX, minY }, new double[] { maxX, maxY });
 				env.setCoordinateReferenceSystem(fTG.getTileCRS());
 
 				if (fullEnv == null) {
-					fullEnv = new GeneralEnvelope(env);
+					fullEnv = new GeneralBounds(env);
 				} else {
 					fullEnv.add(env);
 				}
@@ -295,7 +295,7 @@ public class NaverPathGenerator implements IPathGenerator {
 		double[] reqMinDp = new double[] { roi.getEnvelopeInternal().centre().x - reqHalfRealWidth, roi.getEnvelopeInternal().centre().y - reqHalfRealHeight };
 		double[] reqMaxDp = new double[] { roi.getEnvelopeInternal().centre().x + reqHalfRealWidth, roi.getEnvelopeInternal().centre().y + reqHalfRealHeight };
 
-		GeneralEnvelope reqEnv = new GeneralEnvelope(reqMinDp, reqMaxDp);
+		GeneralBounds reqEnv = new GeneralBounds(reqMinDp, reqMaxDp);
 		reqEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
 		int startTileX = -1;
 		int endTileX = -1;
@@ -320,7 +320,7 @@ public class NaverPathGenerator implements IPathGenerator {
 		int tileRowCount = endTileY - startTileY + 1;
 
 		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
-		GeneralEnvelope fullEnv = null;
+		GeneralBounds fullEnv = null;
 		GeometryFactory gf = new GeometryFactory();
 		for (int y = 0; y < tiles.length; y++) {
 			int ay = -1;
@@ -345,11 +345,11 @@ public class NaverPathGenerator implements IPathGenerator {
 				double maxX = minX + tileRealwidth;
 				int offsetX = x * fTG.getTileWidth();
 				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG.getTileHeight());
-				GeneralEnvelope env = new GeneralEnvelope(new double[] { minX, minY }, new double[] { maxX, maxY });
+				GeneralBounds env = new GeneralBounds(new double[] { minX, minY }, new double[] { maxX, maxY });
 				env.setCoordinateReferenceSystem(fTG.getTileCRS());
 
 				if (fullEnv == null) {
-					fullEnv = new GeneralEnvelope(env);
+					fullEnv = new GeneralBounds(env);
 				} else {
 					fullEnv.add(env);
 				}

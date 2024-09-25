@@ -21,8 +21,8 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 
+import org.geotools.api.data.DataAccessFactory.Param;
 import org.geotools.coverage.grid.io.GridFormatFactorySpi;
-import org.geotools.data.DataAccessFactory.Param;
 import org.geotools.util.KVP;
 
 public final class TMSFormatFactory implements GridFormatFactorySpi {

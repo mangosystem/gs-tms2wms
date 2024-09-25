@@ -4,7 +4,7 @@ import org.apache.wicket.markup.html.form.Form;
 
 @SuppressWarnings("serial")
 public class TMSRasterEditPanel extends AbstractRasterFileEditPanel {
-	public TMSRasterEditPanel(String componentId, Form<?> storeEditForm) {
+	public TMSRasterEditPanel(String componentId, Form storeEditForm) {
         super(
                 componentId,
                 storeEditForm,

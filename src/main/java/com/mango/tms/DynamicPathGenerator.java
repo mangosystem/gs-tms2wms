@@ -10,7 +10,8 @@ import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
 import java.util.Properties;
 
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.GeneralBounds;
+
 
 public class DynamicPathGenerator extends PathGenerator {
 	private String pattern = null;
@@ -90,7 +91,7 @@ public class DynamicPathGenerator extends PathGenerator {
 		double[] reqMinDp = new double[] { centerX - reqHalfRealWidth, centerY - reqHalfRealHeight };
 		double[] reqMaxDp = new double[] { centerX + reqHalfRealWidth, centerY + reqHalfRealHeight };
 
-		GeneralEnvelope reqEnv = new GeneralEnvelope(reqMinDp, reqMaxDp);
+		GeneralBounds reqEnv = new GeneralBounds(reqMinDp, reqMaxDp);
 		reqEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
 //		System.out.println("x0:" + (new BigDecimal(reqEnv.getMinimum(0)).toString()));
 //		System.out.println("y0:" + (new BigDecimal(reqEnv.getMinimum(1)).toString()));
@@ -119,7 +120,7 @@ public class DynamicPathGenerator extends PathGenerator {
 		int tileRowCount = endTileY - startTileY + 1;
 
 		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
-		GeneralEnvelope fullEnv = null;
+		GeneralBounds fullEnv = null;
 		for (int y = 0; y < tiles.length; y++) {
 			int ay = -1;
 			ay = startTileY + y;
@@ -143,11 +144,11 @@ public class DynamicPathGenerator extends PathGenerator {
 				double maxX = minX + tileRealwidth;
 				int offsetX = x * fTG.getTileWidth();
 				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG.getTileHeight());
-				GeneralEnvelope env = new GeneralEnvelope(new double[] { minX, minY }, new double[] { maxX, maxY });
+				GeneralBounds env = new GeneralBounds(new double[] { minX, minY }, new double[] { maxX, maxY });
 				env.setCoordinateReferenceSystem(fTG.getTileCRS());
 
 				if (fullEnv == null) {
-					fullEnv = new GeneralEnvelope(env);
+					fullEnv = new GeneralBounds(env);
 				} else {
 					fullEnv.add(env);
 				}

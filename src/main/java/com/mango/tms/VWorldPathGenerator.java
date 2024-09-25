@@ -9,7 +9,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
 
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.GeneralBounds;
 
 public class VWorldPathGenerator extends PathGenerator {
 
@@ -28,7 +28,7 @@ public class VWorldPathGenerator extends PathGenerator {
 		
 		double[] mindp = new double[]{centerX - halfW,centerY - halfH};
 		double[] maxdp = new double[]{centerX + halfW, centerY + halfH};
-		GeneralEnvelope curEnv = new GeneralEnvelope(mindp, maxdp);
+		GeneralBounds curEnv = new GeneralBounds(mindp, maxdp);
 		curEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
 		
 		int startTileX = (int) Math
@@ -46,7 +46,7 @@ public class VWorldPathGenerator extends PathGenerator {
 
 
 		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
-		GeneralEnvelope fullEnv = null;
+		GeneralBounds fullEnv = null;
 		for (int y = 0; y < tiles.length; y++) {
 			int ay = startTileY + y;
 			double minY = fTG.getOriginY() - (ay + 1) * height;
@@ -59,11 +59,11 @@ public class VWorldPathGenerator extends PathGenerator {
 				int offsetX = x * fTG.getTileWidth();
 				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG
 						.getTileHeight());
-				GeneralEnvelope env = new GeneralEnvelope(new double[]{minX, minY}, new double[]{maxX, maxY});
+				GeneralBounds env = new GeneralBounds(new double[]{minX, minY}, new double[]{maxX, maxY});
 				env.setCoordinateReferenceSystem(fTG.getTileCRS());
 				
 				if (fullEnv == null) {
-					fullEnv = new GeneralEnvelope(env);
+					fullEnv = new GeneralBounds(env);
 				} else {
 					fullEnv.add(env);
 				}

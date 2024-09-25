@@ -9,17 +9,17 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.coverage.grid.Format;
+import org.geotools.api.coverage.grid.GridCoverageWriter;
+import org.geotools.api.parameter.GeneralParameterDescriptor;
+import org.geotools.api.parameter.ParameterDescriptor;
+import org.geotools.api.parameter.ParameterValueGroup;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.imageio.GeoToolsWriteParams;
 import org.geotools.parameter.DefaultParameterDescriptor;
 import org.geotools.parameter.DefaultParameterDescriptorGroup;
 import org.geotools.parameter.ParameterGroup;
 import org.geotools.util.factory.Hints;
-import org.opengis.coverage.grid.Format;
-import org.opengis.coverage.grid.GridCoverageWriter;
-import org.opengis.parameter.GeneralParameterDescriptor;
-import org.opengis.parameter.ParameterDescriptor;
-import org.opengis.parameter.ParameterValueGroup;
 
 public final class TMSFormat extends AbstractGridFormat implements Format {
 

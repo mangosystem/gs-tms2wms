@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
+import org.geotools.api.referencing.datum.PixelInCell;
 import org.geotools.coverage.util.CoverageUtilities;
 //import org.geotools.gce.imagemosaic.ImageMosaicFormat;
 //import org.geotools.gce.imagemosaic.ImageMosaicReader;
@@ -43,10 +44,9 @@ import org.geotools.coverage.util.CoverageUtilities;
 //import org.geotools.gce.tms.NumericDirectoryFilter;
 import org.geotools.gce.imagemosaic.ImageMosaicFormat;
 import org.geotools.gce.imagemosaic.ImageMosaicReader;
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.GeneralBounds;
 import org.geotools.util.factory.Hints;
 import org.geotools.util.logging.Logging;
-import org.opengis.referencing.datum.PixelInCell;
 
 class Utils {
 
@@ -81,7 +81,7 @@ class Utils {
 			return directory.getName();
 		}
 
-		GeneralEnvelope getEnvelope() {
+		GeneralBounds getEnvelope() {
 			return reader.getOriginalEnvelope();
 		}
 
@@ -255,7 +255,7 @@ class Utils {
 			}
 			properties.put("LevelsDirs", sbDirNames.toString());
 			properties.put("Levels", sbLevels.toString());
-			GeneralEnvelope envelope = mosaics.get(0).getEnvelope();
+			GeneralBounds envelope = mosaics.get(0).getEnvelope();
 			properties.put("Envelope2D", envelope.getMinimum(0) + "," + envelope.getMinimum(1) + " "
 					+ envelope.getMaximum(0) + "," + envelope.getMaximum(1));
 			OutputStream os = null;

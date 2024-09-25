@@ -1,6 +1,6 @@
 package com.mango.tms;
 
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.GeneralBounds;
 
 public class Tile {
 	private Rect fRect;
@@ -10,7 +10,7 @@ public class Tile {
 	private int fNumLevel = 0;
 	private boolean isInclude;
 	private TileGenerator tileGenerator;
-	private GeneralEnvelope env;
+	private GeneralBounds env;
 
 	public Tile(Rect rect, int level, int numLevel, boolean isInclude) {
 		fNumLevel = numLevel;
@@ -93,11 +93,11 @@ public class Tile {
 		this.tileGenerator = tileGenerator;
 	}
 
-	public GeneralEnvelope getEnv() {
+	public GeneralBounds getEnv() {
 		return env;
 	}
 
-	public void setEnv(GeneralEnvelope env) {
+	public void setEnv(GeneralBounds env) {
 		this.env = env;
 	}
 }

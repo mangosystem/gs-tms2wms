@@ -9,7 +9,8 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
 
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.GeneralBounds;
+
 
 public class XYZPathGenerator extends PathGenerator {
 
@@ -36,7 +37,7 @@ public class XYZPathGenerator extends PathGenerator {
 		double[] reqMinDp = new double[] { centerX - reqHalfRealWidth, centerY - reqHalfRealHeight };
 		double[] reqMaxDp = new double[] { centerX + reqHalfRealWidth, centerY + reqHalfRealHeight };
 
-		GeneralEnvelope reqEnv = new GeneralEnvelope(reqMinDp, reqMaxDp);
+		GeneralBounds reqEnv = new GeneralBounds(reqMinDp, reqMaxDp);
 		reqEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
 		int startTileX = -1;
 		int endTileX = -1;
@@ -61,7 +62,7 @@ public class XYZPathGenerator extends PathGenerator {
 		int tileRowCount = endTileY - startTileY + 1;
 
 		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
-		GeneralEnvelope fullEnv = null;
+		GeneralBounds fullEnv = null;
 		for (int y = 0; y < tiles.length; y++) {
 			int ay = -1;
 			ay = startTileY + y;
@@ -85,11 +86,11 @@ public class XYZPathGenerator extends PathGenerator {
 				double maxX = minX + tileRealwidth;
 				int offsetX = x * fTG.getTileWidth();
 				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG.getTileHeight());
-				GeneralEnvelope env = new GeneralEnvelope(new double[] { minX, minY }, new double[] { maxX, maxY });
+				GeneralBounds env = new GeneralBounds(new double[] { minX, minY }, new double[] { maxX, maxY });
 				env.setCoordinateReferenceSystem(fTG.getTileCRS());
 
 				if (fullEnv == null) {
-					fullEnv = new GeneralEnvelope(env);
+					fullEnv = new GeneralBounds(env);
 				} else {
 					fullEnv.add(env);
 				}

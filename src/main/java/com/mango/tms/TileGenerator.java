@@ -13,14 +13,14 @@ import java.util.Properties;
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.api.geometry.MismatchedDimensionException;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.geometry.GeneralBounds;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public class TileGenerator {
 
@@ -31,14 +31,14 @@ public class TileGenerator {
 	private final double[] fResolutions;
 	private final CoordinateReferenceSystem fTileCRS;
 	private BufferedImage fBlank;
-	private final GeneralEnvelope fBounds;
-	private GeneralEnvelope fServiceBounds;
+	private final GeneralBounds fBounds;
+	private GeneralBounds fServiceBounds;
 
-	public GeneralEnvelope getServiceBounds() {
+	public GeneralBounds getServiceBounds() {
 		return fServiceBounds;
 	}
 
-	public void setServiceBounds(GeneralEnvelope serviceBounds) {
+	public void setServiceBounds(GeneralBounds serviceBounds) {
 		this.fServiceBounds = serviceBounds;
 	}
 
@@ -142,7 +142,7 @@ public class TileGenerator {
 			throw new RuntimeException("extent ");
 		}
 		values = props.getProperty("extent", "-180,-180,180,180").split(",");
-		fBounds = new GeneralEnvelope(fTileCRS);
+		fBounds = new GeneralBounds(fTileCRS);
 		fBounds.setEnvelope(Double.parseDouble(values[0]), Double.parseDouble(values[1]), Double.parseDouble(values[2]),
 				Double.parseDouble(values[3]));
 
@@ -151,7 +151,7 @@ public class TileGenerator {
 			fServiceBounds = null;
 		} else {
 			values = props.getProperty("service.extent").split(",");
-			fServiceBounds = new GeneralEnvelope(fTileCRS);
+			fServiceBounds = new GeneralBounds(fTileCRS);
 			fServiceBounds.setEnvelope(Double.parseDouble(values[0]), Double.parseDouble(values[1]),
 					Double.parseDouble(values[2]), Double.parseDouble(values[3]));
 		}
@@ -343,7 +343,7 @@ public class TileGenerator {
 			throw new RuntimeException("extent ");
 		}
 		values = ((String) map.get("extent")).split(",");
-		fBounds = new GeneralEnvelope(fTileCRS);
+		fBounds = new GeneralBounds(fTileCRS);
 		fBounds.setEnvelope(Double.parseDouble(values[0]), Double.parseDouble(values[1]), Double.parseDouble(values[2]),
 				Double.parseDouble(values[3]));
 
@@ -352,7 +352,7 @@ public class TileGenerator {
 			fServiceBounds = null;
 		} else {
 			values = ((String) map.get("service_extent")).split(",");
-			fServiceBounds = new GeneralEnvelope(fTileCRS);
+			fServiceBounds = new GeneralBounds(fTileCRS);
 			fServiceBounds.setEnvelope(Double.parseDouble(values[0]), Double.parseDouble(values[1]),
 					Double.parseDouble(values[2]), Double.parseDouble(values[3]));
 		}
@@ -500,7 +500,7 @@ public class TileGenerator {
 		return fBlank;
 	}
 
-	public GeneralEnvelope getBounds() {
+	public GeneralBounds getBounds() {
 		return fBounds;
 	}
 

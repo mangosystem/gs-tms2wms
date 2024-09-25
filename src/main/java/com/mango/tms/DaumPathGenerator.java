@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.Properties;
 
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.GeneralBounds;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 
@@ -98,7 +98,7 @@ public class DaumPathGenerator implements IPathGenerator {
 
 		double[] reqMinDp = new double[] { centerX - reqHalfRealWidth, centerY - reqHalfRealHeight };
 		double[] reqMaxDp = new double[] { centerX + reqHalfRealWidth, centerY + reqHalfRealHeight };
-		GeneralEnvelope reqEnv = new GeneralEnvelope(reqMinDp, reqMaxDp);
+		GeneralBounds reqEnv = new GeneralBounds(reqMinDp, reqMaxDp);
 		reqEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
 
 		int startTileX = (int) Math.floor((reqEnv.getMinimum(0) - fTG.getOriginX()) / (tileRealwidth));
@@ -111,7 +111,7 @@ public class DaumPathGenerator implements IPathGenerator {
 		int tileRowCount = endTileY - startTileY + 1;
 
 		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
-		GeneralEnvelope fullEnv = null;
+		GeneralBounds fullEnv = null;
 		for (int y = 0; y < tiles.length; y++) {
 			int ay = endTileY - y;
 			double minY = fTG.getOriginY() + ay * tileRealheight;
@@ -123,11 +123,11 @@ public class DaumPathGenerator implements IPathGenerator {
 				double maxX = minX + tileRealwidth;
 				int offsetX = x * fTG.getTileWidth();
 				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG.getTileHeight());
-				GeneralEnvelope env = new GeneralEnvelope(new double[] { minX, minY }, new double[] { maxX, maxY });
+				GeneralBounds env = new GeneralBounds(new double[] { minX, minY }, new double[] { maxX, maxY });
 				env.setCoordinateReferenceSystem(fTG.getTileCRS());
 
 				if (fullEnv == null) {
-					fullEnv = new GeneralEnvelope(env);
+					fullEnv = new GeneralBounds(env);
 				} else {
 					fullEnv.add(env);
 				}
@@ -210,7 +210,7 @@ public class DaumPathGenerator implements IPathGenerator {
 
 		double[] reqMinDp = new double[] { centerX - reqHalfRealWidth, centerY - reqHalfRealHeight };
 		double[] reqMaxDp = new double[] { centerX + reqHalfRealWidth, centerY + reqHalfRealHeight };
-		GeneralEnvelope reqEnv = new GeneralEnvelope(reqMinDp, reqMaxDp);
+		GeneralBounds reqEnv = new GeneralBounds(reqMinDp, reqMaxDp);
 		reqEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
 
 		int startTileX = (int) Math.floor((reqEnv.getMinimum(0) - fTG.getOriginX()) / (tileRealwidth));
@@ -223,7 +223,7 @@ public class DaumPathGenerator implements IPathGenerator {
 		int tileRowCount = endTileY - startTileY + 1;
 
 		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
-		GeneralEnvelope fullEnv = null;
+		GeneralBounds fullEnv = null;
 		for (int y = 0; y < tiles.length; y++) {
 			int ay = endTileY - y;
 			double minY = fTG.getOriginY() + ay * tileRealheight;
@@ -235,11 +235,11 @@ public class DaumPathGenerator implements IPathGenerator {
 				double maxX = minX + tileRealwidth;
 				int offsetX = x * fTG.getTileWidth();
 				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG.getTileHeight());
-				GeneralEnvelope env = new GeneralEnvelope(new double[] { minX, minY }, new double[] { maxX, maxY });
+				GeneralBounds env = new GeneralBounds(new double[] { minX, minY }, new double[] { maxX, maxY });
 				env.setCoordinateReferenceSystem(fTG.getTileCRS());
 
 				if (fullEnv == null) {
-					fullEnv = new GeneralEnvelope(env);
+					fullEnv = new GeneralBounds(env);
 				} else {
 					fullEnv.add(env);
 				}
@@ -272,7 +272,7 @@ public class DaumPathGenerator implements IPathGenerator {
 		double[] reqMinDp = new double[] { roi.getEnvelopeInternal().centre().x - reqHalfRealWidth, roi.getEnvelopeInternal().centre().y - reqHalfRealHeight };
 		double[] reqMaxDp = new double[] { roi.getEnvelopeInternal().centre().x + reqHalfRealWidth, roi.getEnvelopeInternal().centre().y + reqHalfRealHeight };
 
-		GeneralEnvelope reqEnv = new GeneralEnvelope(reqMinDp, reqMaxDp);
+		GeneralBounds reqEnv = new GeneralBounds(reqMinDp, reqMaxDp);
 		reqEnv.setCoordinateReferenceSystem(fTG.getTileCRS());
 
 		int startTileX = (int) Math.floor((reqEnv.getMinimum(0) - fTG.getOriginX()) / (tileRealwidth));
@@ -285,7 +285,7 @@ public class DaumPathGenerator implements IPathGenerator {
 		int tileRowCount = endTileY - startTileY + 1;
 
 		Tile[][] tiles = new Tile[tileRowCount][tileColCount];
-		GeneralEnvelope fullEnv = null;
+		GeneralBounds fullEnv = null;
 		for (int y = 0; y < tiles.length; y++) {
 			int ay = endTileY - y;
 			double minY = fTG.getOriginY() + ay * tileRealheight;
@@ -297,11 +297,11 @@ public class DaumPathGenerator implements IPathGenerator {
 				double maxX = minX + tileRealwidth;
 				int offsetX = x * fTG.getTileWidth();
 				Rect rect = new Rect(offsetX, offsetY, fTG.getTileWidth(), fTG.getTileHeight());
-				GeneralEnvelope env = new GeneralEnvelope(new double[] { minX, minY }, new double[] { maxX, maxY });
+				GeneralBounds env = new GeneralBounds(new double[] { minX, minY }, new double[] { maxX, maxY });
 				env.setCoordinateReferenceSystem(fTG.getTileCRS());
 
 				if (fullEnv == null) {
-					fullEnv = new GeneralEnvelope(env);
+					fullEnv = new GeneralBounds(env);
 				} else {
 					fullEnv.add(env);
 				}
