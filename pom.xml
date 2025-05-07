@@ -126,13 +126,9 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<sourceDirectory>src</sourceDirectory>
 		<resources>
 			<resource>
-				<directory>src</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
+				<directory>src/main/resource</directory>
 			</resource>
 		</resources>
 		<plugins>

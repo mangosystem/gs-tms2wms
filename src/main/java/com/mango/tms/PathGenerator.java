@@ -194,6 +194,34 @@ public class PathGenerator implements IPathGenerator {
 					ImageIO.write(bi, format, f);
 				}
 				
+				
+				int tileWidth = fTG.getTileWidth();
+				int tileHeight = fTG.getTileHeight();
+				
+				// 20250507 서세원 
+				// vworld tile에서 규정된 사이즈와 다르게 이미지를 전달하는 경우가 발생
+				// 예를 들어 256을 요청하는데 512 사이즈로 옴
+				// 강제로 256으로 와핑함 
+				if(bi.getWidth() != tileWidth || bi.getHeight() != tileHeight) {
+					Graphics2D graphics = null;
+					
+					try {
+						BufferedImage tileBi = new BufferedImage(tileWidth, tileHeight, BufferedImage.TYPE_INT_ARGB);
+						graphics = (Graphics2D) tileBi.getGraphics();
+						graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+						graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+						graphics.drawImage(bi, 0, 0, tileBi.getWidth(), tileBi.getHeight(), 0, 0, bi.getWidth(), bi.getHeight(), null);	
+						bi = tileBi;
+					} catch(Exception e) {
+						
+					} finally {
+						if(graphics != null) {
+							graphics.dispose();
+						}
+					}
+					
+				}
+				
 				return bi;
 			}
 		} catch (Exception e) {

@@ -2,6 +2,8 @@ package com.mango.tms;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -437,6 +439,7 @@ public class TileGenerator {
 	}
 
 	public BufferedImage getTileImage(Tile tile) {
+		BufferedImage bi = null;
 		// System.out.println(fPathGenerator.buildPath(tile));
 		if (!tile.isInclude()) {
 			// System.out.println("BLANK");
@@ -453,7 +456,7 @@ public class TileGenerator {
 				File cacheFile = new File(new URI(cacheFilePath));
 				if (cacheFile.exists()) {
 					// System.out.println("CacheFile - " + cacheFilePath);
-					return ImageIO.read(cacheFile);
+					bi = ImageIO.read(cacheFile);
 				}
 			}
 		} catch (Exception e) {
@@ -467,7 +470,7 @@ public class TileGenerator {
 			if (file.exists()) {
 				return ImageIO.read(file);
 			} else {
-				BufferedImage bi = null;
+				
 				try {
 					bi = ImageIO.read(new URL(path));
 					if (fTileCache) {
@@ -480,12 +483,40 @@ public class TileGenerator {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				return bi;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return fBlank;
 		}
+		
+		int tileWidth = getTileWidth();
+		int tileHeight = getTileHeight();
+		
+		// 20250507 서세원 
+		// vworld tile에서 규정된 사이즈와 다르게 이미지를 전달하는 경우가 발생
+		// 예를 들어 256을 요청하는데 512 사이즈로 옴
+		// 강제로 256으로 와핑함 
+		if(bi.getWidth() != tileWidth || bi.getHeight() != tileHeight) {
+			Graphics2D graphics = null;
+			
+			try {
+				BufferedImage tileBi = new BufferedImage(tileWidth, tileHeight, BufferedImage.TYPE_INT_ARGB);
+				graphics = (Graphics2D) tileBi.getGraphics();
+				graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+				graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+				graphics.drawImage(bi, 0, 0, tileBi.getWidth(), tileBi.getHeight(), 0, 0, bi.getWidth(), bi.getHeight(), null);	
+				bi = tileBi;
+			} catch(Exception e) {
+				
+			} finally {
+				if(graphics != null) {
+					graphics.dispose();
+				}
+			}
+			
+		}
+		
+		return bi;
 	}
 
 	public double getTileOriginX() {
